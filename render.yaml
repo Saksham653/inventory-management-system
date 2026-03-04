@@ -1,9 +1,8 @@
 services:
   - type: web
     name: stockwave-ims
-    runtime: python
-    buildCommand: "./build.sh"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -15,7 +14,3 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
-      - key: PYTHON_VERSION
-        value: "3.11.6"
-      - key: NODE_VERSION
-        value: "20.10.0"

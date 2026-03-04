@@ -1,0 +1,12 @@
+venv/
+venv_dev/
+__pycache__/
+*.pyc
+.env
+*.db
+frontend/node_modules/
+frontend/dist/
+.git/
+.gitignore
+.gemini/
+admin_add_sales.py
