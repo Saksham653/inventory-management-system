@@ -1,141 +1,148 @@
 <div align="center">
 
-# 📦 SAM IMS — Inventory Management System
+<img src="assets/logo.png" alt="StockWaves Logo" width="110" />
 
-**A production-ready, AI-powered inventory management platform**  
-built with FastAPI · React · PostgreSQL · Docker
+# StockWaves
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Now-0066CC?style=for-the-badge)](https://inventory-management-system-ywux.onrender.com)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-asyncpg-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+**AI-powered Inventory Management System**
+
+*Real-time stock control · Smart analytics · Built for teams*
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_App-Visit_Now-0066CC?style=for-the-badge)](https://inventory-management-system-ywux.onrender.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-asyncpg-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
 
 </div>
 
 ---
 
-## 🚀 Live Demo
+## 🌊 What is StockWaves?
 
-**👉 [https://inventory-management-system-ywux.onrender.com](https://inventory-management-system-ywux.onrender.com)**
+**StockWaves** is a production-ready, full-stack inventory management platform that gives your team real-time control over products, sales, suppliers, and employees — all in one place. It ships with a built-in **AI assistant** powered by Groq that answers questions about your actual inventory data in plain English.
 
-Try it instantly with the demo accounts below — no sign-up needed.
+> 🚀 **Live at:** [https://inventory-management-system-ywux.onrender.com](https://inventory-management-system-ywux.onrender.com)
 
-| Role | Email | Password | Access Level |
-|------|-------|----------|--------------|
-| 🔴 Admin | `admin@sam.com` | `admin123` | Full access — all modules |
-| 🟡 Manager | `manager@sam.com` | `pass123` | Products, Sales, Suppliers |
-| 🟢 Staff | `staff@sam.com` | `pass123` | View & record sales only |
+---
+
+## 🔑 Demo Access
+
+Try it instantly — no sign-up required:
+
+| Role | Email | Password | Permissions |
+|------|-------|----------|-------------|
+| 🔴 **Admin** | `admin@sam.com` | `admin123` | Full access to all modules |
+| 🟡 **Manager** | `manager@sam.com` | `pass123` | Products, Sales, Suppliers |
+| 🟢 **Staff** | `staff@sam.com` | `pass123` | View & record sales only |
 
 ---
 
 ## ✨ Features
 
 ### 📊 Dashboard & Analytics
-- Real-time KPI cards — Total Revenue, Products, Employees, Low Stock alerts
-- Interactive revenue trend charts (AreaChart — last 6 months)
+- Live KPI cards — Total Revenue, Products in stock, Active Employees, Low-stock alerts
+- Interactive 6-month revenue trend (AreaChart)
 - Category distribution with animated PieChart
-- Recent sales feed with live updates
+- Recent sales feed with real-time updates
 
 ### 📦 Product Management
-- Full CRUD — create, edit, delete, search products
-- SKU tracking, brand, category & supplier linkage
-- Stock quantity with configurable low-stock threshold alerts
-- Price tier management per product
+- Full CRUD — create, search, edit, delete products
+- SKU tracking, brand tagging, category & supplier linkage
+- Stock quantity with configurable **low-stock threshold** alerts
+- Auto stock-deduction on every recorded sale
 
-### 🗂️ Category & Supplier Management
-- Organize products into categories with descriptions
-- Track supplier contact info, address, and linked products
-- Full create/edit/delete with search and filters
+### 🗂️ Categories & Suppliers
+- Organize products into named categories with descriptions
+- Track supplier contact info, address, and linked inventory
+- Full create / edit / delete with search and filters
 
 ### 👥 Employee Management
-- Employee profiles — name, role, DOB, contact, salary, address
-- Role-based access control: Admin / Manager / Staff
-- Date of joining, gender tracking, and full edit support
+- Employee profiles — name, role, DOB, salary, contact, address
+- Date of joining, gender tracking, full edit support
+- Role-based permission gates: Admin / Manager / Staff
 
 ### 💰 Sales Management
-- Record sales with automatic stock deduction
+- Record transactions with automatic stock deduction
 - Customer contact tracking per sale
 - Sales history with filters, search, and revenue summaries
-- Per-product sales breakdown
+- Per-product sales breakdown and trend charts
 
-### 🤖 AI Chatbot Assistant
-- Integrated AI assistant powered by **Groq**
-- Live inventory context — asks questions about your actual stock, sales, and employees
-- Natural language queries like *"Which products are low on stock?"* or *"Show me this month's top sales"*
+### 🤖 AI Chatbot (Groq-powered)
+- Ask questions about your inventory in plain English
+- Live data context — queries your actual stock, sales & employees
+- Examples: *"Which products are running low?"*, *"Who made the most sales this month?"*
 - Floating chat widget available across all pages
 
-### 🔐 Security
-- JWT authentication (30-min access tokens, 7-day refresh)
-- Passwords hashed with **bcrypt** (cost factor 12)
-- Role-based permission gates on every action
-- CORS restricted to frontend domain
-- All inputs validated via **Pydantic** — zero SQL injection risk
-- HTTPS enforced automatically on Render (TLS)
+### 📁 Bulk Data Import
+- Upload products and sales via **Excel / CSV**
+- Built-in validation with row-level error reporting
 
-### 📁 Data Import
-- Bulk upload products and sales via **Excel / CSV**
-- Built-in uploader with validation and error reporting
+### 🔐 Security
+- JWT authentication (30-min access · 7-day refresh tokens)
+- Passwords hashed with **bcrypt** (cost factor 12)
+- Pydantic validation on all inputs — zero SQL injection risk
+- CORS restricted to frontend domain
+- HTTPS enforced automatically via Render (TLS)
 
 ---
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| **Backend** | Python 3.12, FastAPI 0.115, SQLAlchemy 2.0 (async) |
-| **Frontend** | React 18.3, Vite 5.4, Recharts, Lucide React |
-| **Database** | PostgreSQL (asyncpg driver) |
-| **Auth** | JWT (python-jose), bcrypt (passlib) |
-| **AI** | Groq API |
-| **Deployment** | Docker (multi-stage build), Render.com |
-| **Data** | Pandas, OpenPyXL (Excel import/export) |
+|-------|------------|
+| **Backend** | Python 3.12 · FastAPI 0.115 · SQLAlchemy 2.0 (async) |
+| **Frontend** | React 18.3 · Vite 5.4 · Recharts · Lucide React |
+| **Database** | PostgreSQL with asyncpg driver |
+| **Auth** | JWT via python-jose · bcrypt via passlib |
+| **AI** | Groq API (LLM chatbot) |
+| **Infra** | Docker multi-stage build · Render.com |
+| **Data** | Pandas · OpenPyXL (Excel import/export) |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-inventory-management-system/
+stockwaves/
 ├── app/
 │   ├── api/
-│   │   ├── auth.py          # JWT login & register
-│   │   ├── products.py      # Product CRUD
-│   │   ├── categories.py    # Category CRUD
-│   │   ├── suppliers.py     # Supplier CRUD
-│   │   ├── employees.py     # Employee CRUD
-│   │   ├── sales.py         # Sales & stock deduction
-│   │   ├── dashboard.py     # Analytics & KPIs
-│   │   ├── chatbot.py       # AI assistant (Groq)
-│   │   └── uploader.py      # Excel/CSV bulk import
+│   │   ├── auth.py           # JWT login & register
+│   │   ├── products.py       # Product CRUD
+│   │   ├── categories.py     # Category CRUD
+│   │   ├── suppliers.py      # Supplier CRUD
+│   │   ├── employees.py      # Employee CRUD
+│   │   ├── sales.py          # Sales + auto stock deduction
+│   │   ├── dashboard.py      # Analytics & KPIs
+│   │   ├── chatbot.py        # AI assistant (Groq)
+│   │   └── uploader.py       # Excel/CSV bulk import
 │   ├── core/
-│   │   ├── config.py        # Environment settings
-│   │   ├── database.py      # Async SQLAlchemy engine
-│   │   └── seed.py          # Initial data seeder
+│   │   ├── config.py         # Environment settings (Pydantic)
+│   │   ├── database.py       # Async SQLAlchemy engine
+│   │   └── seed.py           # Initial data seeder
 │   └── models/
-│       └── schema.py        # ORM models
+│       └── schema.py         # ORM models
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx          # Full React SPA
+│   │   ├── App.jsx           # Full React SPA
 │   │   └── main.jsx
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
-├── main.py                  # FastAPI app entry + static serving
+├── assets/
+│   └── logo.png              # StockWaves logo
+├── main.py                   # FastAPI entry + static file serving
 ├── requirements.txt
-├── Dockerfile               # Multi-stage build
-├── render.yaml              # Render deployment config
-├── build.sh                 # Render build script
+├── Dockerfile                # Multi-stage: Node build → Python serve
+├── render.yaml               # Render deployment config
+├── build.sh                  # Render build script
 └── .env.example
 ```
 
 ---
 
-## ⚡ Quick Start (Local)
-
-### Prerequisites
-- Docker & Docker Compose, **or** Node.js 20+ & Python 3.12+
+## ⚡ Quick Start
 
 ### Option A — Docker (Recommended)
 
@@ -143,9 +150,9 @@ inventory-management-system/
 git clone https://github.com/Saksham653/inventory-management-system.git
 cd inventory-management-system
 cp .env.example .env
-# Fill in DATABASE_URL, SECRET_KEY, GROQ_API_KEY in .env
-docker build -t sam-ims .
-docker run -p 8000:8000 --env-file .env sam-ims
+# Fill in DATABASE_URL, SECRET_KEY, GROQ_API_KEY
+docker build -t stockwaves .
+docker run -p 8000:8000 --env-file .env stockwaves
 ```
 
 Visit: [http://localhost:8000](http://localhost:8000)
@@ -155,7 +162,7 @@ Visit: [http://localhost:8000](http://localhost:8000)
 **Backend:**
 ```bash
 python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
@@ -164,20 +171,19 @@ uvicorn main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev                     # Runs on http://localhost:5173
 ```
 
-- Frontend dev server: [http://localhost:5173](http://localhost:5173)
-- Backend API + Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+API docs (Swagger UI): [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
 ## 🌐 Deploy to Render
 
-1. Fork this repository to your GitHub
+1. Fork this repo to your GitHub account
 2. Go to [render.com](https://render.com) → **New → Web Service**
-3. Connect your GitHub repo → select **Docker** as environment
-4. Set the following environment variables in Render dashboard:
+3. Connect your repo → select **Docker** as the environment
+4. Add these environment variables in the Render dashboard:
 
 | Variable | Description |
 |----------|-------------|
@@ -186,16 +192,16 @@ npm run dev
 | `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com) |
 | `FRONTEND_URL` | Your Render service URL (for CORS) |
 
-5. Click **Deploy** — Render handles the rest!
+5. Hit **Deploy** — Render handles the rest!
 
 ---
 
 ## 📡 API Reference
 
-All endpoints require `Authorization: Bearer <token>` except login.
+All endpoints require `Authorization: Bearer <token>` except login and register.
 
-| Method | Endpoint | Role Required | Description |
-|--------|----------|---------------|-------------|
+| Method | Endpoint | Role | Description |
+|--------|----------|------|-------------|
 | `POST` | `/api/v1/auth/login` | Public | Login → returns JWT |
 | `POST` | `/api/v1/auth/register` | Public | Register new user |
 | `GET` | `/api/v1/dashboard/stats` | Any | KPIs & analytics |
@@ -208,20 +214,21 @@ All endpoints require `Authorization: Bearer <token>` except login.
 | `GET` | `/api/v1/employees/` | Any | List employees |
 | `POST` | `/api/v1/employees/` | Admin | Add employee |
 | `GET` | `/api/v1/suppliers/` | Any | List suppliers |
+| `POST` | `/api/v1/suppliers/` | Admin/Manager | Create supplier |
 | `POST` | `/api/v1/chatbot/chat` | Any | AI assistant query |
 | `POST` | `/api/v1/uploader/` | Admin/Manager | Bulk import via Excel |
 
-Interactive docs available at `/docs` (Swagger UI) when running locally.
+Full interactive docs available at `/docs` when running locally.
 
 ---
 
 ## 🔑 Environment Variables
 
-Copy `.env.example` to `.env` and fill in:
+Copy `.env.example` → `.env` and fill in:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@host/dbname
-SECRET_KEY=your-256-bit-random-secret
+SECRET_KEY=your-super-secret-256-bit-key
 GROQ_API_KEY=your-groq-api-key
 FRONTEND_URL=https://your-app.onrender.com
 ```
@@ -230,8 +237,7 @@ FRONTEND_URL=https://your-app.onrender.com
 
 ## 📜 License
 
-This project is licensed under the **MIT License**.  
-See [LICENSE](LICENSE) for full details.
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -239,23 +245,25 @@ See [LICENSE](LICENSE) for full details.
 
 **Saksham**  
 GitHub: [@Saksham653](https://github.com/Saksham653)  
-Repository: [inventory-management-system](https://github.com/Saksham653/inventory-management-system)
+Repository: [github.com/Saksham653/inventory-management-system](https://github.com/Saksham653/inventory-management-system)
 
 ---
 
 ## 🙏 Acknowledgements
 
-- [FastAPI](https://fastapi.tiangolo.com) — Modern Python web framework
-- [Groq](https://groq.com) — Ultra-fast AI inference for the chatbot
-- [Render](https://render.com) — Seamless cloud deployment
-- [Recharts](https://recharts.org) — Composable chart library for React
+- [FastAPI](https://fastapi.tiangolo.com) — Modern async Python web framework
+- [Groq](https://groq.com) — Ultra-fast LLM inference for the AI chatbot
+- [Render](https://render.com) — Seamless Docker-based cloud deployment
+- [Recharts](https://recharts.org) — Composable charting library for React
 
 ---
 
 <div align="center">
 
-Made with ❤️ by [Saksham653](https://github.com/Saksham653)
+<img src="assets/logo.png" width="52" /><br><br>
 
-⭐ If you found this useful, please consider starring the repo!
+**StockWaves** — Built with ❤️ by [Saksham653](https://github.com/Saksham653)
+
+*Found this useful? Please ⭐ star the repo!*
 
 </div>
