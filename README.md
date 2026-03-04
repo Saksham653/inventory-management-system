@@ -8,7 +8,8 @@
 
 *Real-time stock control · Smart analytics · Built for teams*
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_App-Visit_Now-0066CC?style=for-the-badge)](https://inventory-management-system-ywux.onrender.com)
+[![Landing Page](https://img.shields.io/badge/🌊_Landing_Page-Visit_Now-0f172a?style=for-the-badge)](https://saksham653.github.io/inventory-management-system/)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_App-Open_Now-0066CC?style=for-the-badge)](https://inventory-management-system-ywux.onrender.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-asyncpg-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
@@ -23,7 +24,9 @@
 
 **StockWaves** is a production-ready, full-stack inventory management platform that gives your team real-time control over products, sales, suppliers, and employees — all in one place. It ships with a built-in **AI assistant** powered by Groq that answers questions about your actual inventory data in plain English.
 
-> 🚀 **Live at:** [https://inventory-management-system-ywux.onrender.com](https://inventory-management-system-ywux.onrender.com)
+> 🌊 **Landing Page:** [https://saksham653.github.io/inventory-management-system/](https://saksham653.github.io/inventory-management-system/)
+>
+> 🚀 **Live App:** [https://inventory-management-system-ywux.onrender.com](https://inventory-management-system-ywux.onrender.com)
 
 ---
 
