@@ -61,14 +61,15 @@ async def log_requests(request: Request, call_next):
     logger.info(f"{request.method} {request.url.path} - {response.status_code} ({duration:.2f}s)")
     return response
 
+# ── Serve built React frontend (production) ──────────────────────────────────
+FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
+
 # Root endpoint
 @app.get("/")
 async def root():
-    return {
-        "status": "online",
-        "service": "SAM IMS API",
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-    }
+    if FRONTEND_DIST.is_dir():
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+    return {"status": "online", "service": "SAM IMS API", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
 
 # API v1 routes
 app.include_router(auth.router,       prefix="/api/v1/auth",       tags=["Auth"])
@@ -80,9 +81,6 @@ app.include_router(sales.router,      prefix="/api/v1/sales",      tags=["Sales"
 app.include_router(dashboard.router,  prefix="/api/v1/dashboard",  tags=["Dashboard"])
 app.include_router(chatbot.router,    prefix="/api/v1/chatbot",    tags=["AI Assistant"])
 app.include_router(uploader.router,   prefix="/api/v1/uploader",   tags=["Data Uploader"])
-
-# ── Serve built React frontend (production) ──────────────────────────────────
-FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
 
 if FRONTEND_DIST.is_dir():
     # Serve static assets (JS, CSS, images)
