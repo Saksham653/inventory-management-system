@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="StockWaves Logo" width="110" />
+<img src="https://github.com/user-attachments/assets/0f00c94b-3c85-4856-9d31-32a4c1c51ec2" alt="StockWaves Logo" width="110" />
 
 # StockWaves
 
@@ -260,7 +260,7 @@ Repository: [github.com/Saksham653/inventory-management-system](https://github.c
 
 <div align="center">
 
-<img src="assets/logo.png" width="52" /><br><br>
+<img src="https://github.com/user-attachments/assets/0f00c94b-3c85-4856-9d31-32a4c1c51ec2" width="52" /><br><br>
 
 **StockWaves** — Built with ❤️ by [Saksham653](https://github.com/Saksham653)
 
