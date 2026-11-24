@@ -145,3 +145,35 @@ class Employee(Base):
     address = Column(String)
     salary = Column(Float)
     created_at = Column(UTCDateTime, server_default=func.now())
+
+
+PO_STATUSES = ("draft", "sent", "received", "cancelled")
+
+
+class PurchaseOrder(Base):
+    __tablename__ = "purchase_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"))
+    status = Column(String, nullable=False, default="draft")
+    note = Column(String)
+    source = Column(String)  # e.g. "radar" when drafted from Paisa Radar
+    created_by = Column(String)
+    created_at = Column(UTCDateTime, server_default=func.now())
+    sent_at = Column(UTCDateTime)
+    received_at = Column(UTCDateTime)
+
+    lines = relationship("PurchaseOrderLine", back_populates="order", cascade="all, delete-orphan",
+                         lazy="selectin")
+
+
+class PurchaseOrderLine(Base):
+    __tablename__ = "purchase_order_lines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("purchase_orders.id"), index=True, nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    qty = Column(Integer, nullable=False)
+    unit_cost = Column(Float, default=0)
+
+    order = relationship("PurchaseOrder", back_populates="lines")
