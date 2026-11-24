@@ -5,6 +5,9 @@ import { ToastProvider } from "./lib/motion"
 import Shell, { Ambient, PAGES } from "./components/Shell"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
+import Today from "./pages/Today"
+import Radar from "./pages/Radar"
+import Orders from "./pages/Orders"
 import Products from "./pages/Products"
 import Sales from "./pages/Sales"
 import Ledger from "./pages/Ledger"
@@ -17,7 +20,7 @@ import Assistant from "./pages/Assistant"
 // Pages are addressed by the URL hash (#products) so they can be bookmarked and survive reloads.
 function readHash() {
   const id = window.location.hash.slice(1)
-  return PAGES.some(p => p.id === id) ? id : "dashboard"
+  return PAGES.some(p => p.id === id) ? id : "today"
 }
 
 function Workspace() {
@@ -41,7 +44,10 @@ function Workspace() {
 
   const def = PAGES.find(p => p.id === page)
   const allowed = !def?.needs || can[def.needs]
-  const view = !allowed ? <Dashboard setPage={setPage} /> : {
+  const view = !allowed ? <Today setPage={setPage} openLedger={openLedger} /> : {
+    today: <Today setPage={setPage} openLedger={openLedger} />,
+    radar: <Radar openLedger={openLedger} />,
+    orders: <Orders setPage={setPage} />,
     dashboard: <Dashboard setPage={setPage} />,
     products: <Products openLedger={openLedger} />,
     sales: <Sales />,
@@ -53,7 +59,7 @@ function Workspace() {
     assistant: <Assistant />,
   }[page]
 
-  return <Shell page={allowed ? page : "dashboard"} setPage={setPage} openProduct={openLedger}>{view}</Shell>
+  return <Shell page={allowed ? page : "today"} setPage={setPage} openProduct={openLedger}>{view}</Shell>
 }
 
 function Gate() {

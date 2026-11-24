@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
-  BookOpenText, Boxes, Bot, FolderTree, LayoutDashboard, LogOut, Menu, PanelLeftClose,
-  PanelLeftOpen, Search, ShoppingCart, Truck, Upload, Users,
+  BookOpenText, Boxes, Bot, ClipboardList, FolderTree, LayoutDashboard, LogOut, Menu, PanelLeftClose,
+  PanelLeftOpen, Radar, Search, ShoppingCart, Sun, Truck, Upload, Users,
 } from "lucide-react"
 import { useAuth } from "../lib/auth"
 import { initials } from "../lib/format"
@@ -10,10 +10,13 @@ import { Pill } from "./ui"
 import CommandPalette from "./CommandPalette"
 
 export const PAGES = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, group: "Shop" },
+  { id: "today", label: "Today", icon: Sun, group: "Shop" },
   { id: "products", label: "Products", icon: Boxes, group: "Shop" },
   { id: "sales", label: "Sales", icon: ShoppingCart, group: "Shop" },
   { id: "ledger", label: "Stock ledger", icon: BookOpenText, group: "Shop" },
+  { id: "radar", label: "Paisa Radar", icon: Radar, group: "Money" },
+  { id: "orders", label: "Purchase orders", icon: ClipboardList, group: "Money" },
+  { id: "dashboard", label: "Analytics", icon: LayoutDashboard, group: "Money" },
   { id: "categories", label: "Categories", icon: FolderTree, group: "Setup" },
   { id: "suppliers", label: "Suppliers", icon: Truck, group: "Setup" },
   { id: "team", label: "Team", icon: Users, group: "Setup", needs: "manage" },

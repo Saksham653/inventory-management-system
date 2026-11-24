@@ -44,6 +44,17 @@ Try it instantly — no sign-up required. These accounts exist only when `SEED_D
 
 ## ✨ Features
 
+### 💸 Paisa Radar (the Today screen)
+Inventory counted in rupees. Every morning the home screen answers three questions with plain arithmetic on your sales and stock ledger:
+- **Where is my money stuck?** Cash at cost, bucketed by days since each product last sold (0–30, 31–60, 61–90, 90+). No sale for 60+ days counts as stuck.
+- **What will run out?** Days of stock left vs supplier lead time + a 3-day buffer, with the sales at risk before a new delivery could arrive.
+- **What should I do today?** Ranked actions by rupees at stake: reorder, bundle with a fast seller, a discount that stays above cost, return extra stock to the supplier.
+- **How is this calculated?** Every figure opens the formula with your real numbers, and links to the ledger rows behind it.
+
+### 🧾 Purchase Orders
+- One click turns Paisa Radar's reorder list into draft purchase orders, one per supplier
+- Edit quantities, mark as sent, then **Stock arrived** adds every line to stock through the ledger and updates cost prices
+
 ### 📊 Dashboard & Analytics
 - Live KPI cards — Total Revenue, Products in stock, Active Employees, Low-stock alerts
 - Interactive 6-month revenue trend (AreaChart)
@@ -137,6 +148,7 @@ stockwaves/
 │   │   └── seed.py           # Demo users & sample shop
 │   ├── services/
 │   │   ├── stock.py          # The only code that changes stock (writes the ledger)
+│   │   ├── radar.py          # Paisa Radar calculations
 │   │   └── insights.py       # Days of cover & reorder risk
 │   └── models/
 │       └── schema.py         # ORM models
@@ -229,6 +241,10 @@ All endpoints require `Authorization: Bearer <token>` except login and register.
 | `GET` | `/api/v1/auth/me` | Any | Current user |
 | `POST` | `/api/v1/auth/users` | Admin | Create a login for a team member |
 | `GET` | `/api/v1/dashboard/stats` | Any | KPIs & analytics |
+| `GET` | `/api/v1/radar/` | Any | Paisa Radar: stuck cash, reorder list, ranked actions |
+| `GET` | `/api/v1/purchase-orders/` | Any | Purchase orders |
+| `POST` | `/api/v1/purchase-orders/draft-from-radar` | Admin/Manager | Draft POs from the reorder list |
+| `POST` | `/api/v1/purchase-orders/{id}/receive` | Admin/Manager | Receive stock into the ledger |
 | `GET` | `/api/v1/products/` | Any | List all products |
 | `POST` | `/api/v1/products/` | Admin/Manager | Create product |
 | `PATCH` | `/api/v1/products/{id}` | Admin/Manager | Update product |

@@ -9,9 +9,10 @@ export function rupees(n) {
 export function rupeesShort(n) {
   const v = Number(n) || 0
   const a = Math.abs(v)
-  if (a >= 1e7) return `₹${(v / 1e7).toFixed(a >= 1e8 ? 0 : 1)}Cr`
-  if (a >= 1e5) return `₹${(v / 1e5).toFixed(a >= 1e6 ? 0 : 1)}L`
-  if (a >= 1e3) return `₹${(v / 1e3).toFixed(a >= 1e4 ? 0 : 1)}k`
+  const short = (x, unit) => `₹${x.toFixed(1).replace(/\.0$/, "")}${unit}`
+  if (a >= 1e7) return short(v / 1e7, "Cr")
+  if (a >= 1e5) return short(v / 1e5, "L")
+  if (a >= 1e3) return short(v / 1e3, "k")
   return rupees(v)
 }
 

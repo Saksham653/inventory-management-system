@@ -12,7 +12,7 @@ from app.core.database import engine
 from app.core.migrate import upgrade_schema, backfill_ledger
 from app.core.seed import seed_data
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock
+from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -74,6 +74,8 @@ app.include_router(suppliers.router,  prefix="/api/v1/suppliers",  tags=["Suppli
 app.include_router(employees.router,  prefix="/api/v1/employees",  tags=["Employees"])
 app.include_router(sales.router,      prefix="/api/v1/sales",      tags=["Sales"])
 app.include_router(stock.router,      prefix="/api/v1/stock",      tags=["Stock ledger"])
+app.include_router(radar.router,      prefix="/api/v1/radar",      tags=["Paisa Radar"])
+app.include_router(purchase_orders.router, prefix="/api/v1/purchase-orders", tags=["Purchase orders"])
 app.include_router(dashboard.router,  prefix="/api/v1/dashboard",  tags=["Dashboard"])
 app.include_router(chatbot.router,    prefix="/api/v1/chatbot",    tags=["AI Assistant"])
 app.include_router(uploader.router,   prefix="/api/v1/uploader",   tags=["Data Uploader"])
