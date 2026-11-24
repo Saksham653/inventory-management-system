@@ -9,10 +9,10 @@ from pathlib import Path
 
 from app.core.config import settings
 from app.core.database import engine
-from app.models.schema import Base
+from app.core.migrate import upgrade_schema, backfill_ledger
 from app.core.seed import seed_data
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader
+from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -20,21 +20,16 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create tables on startup
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        
-        # Seed data
-        async with AsyncSession(engine) as db:
-            await seed_data(db)
-    except Exception as e:
-        logger.error(f"Lifespan error: {e}")
-        
+    # Create/upgrade tables, seed demo data, make sure every product has ledger history.
+    await upgrade_schema(engine)
+    async with AsyncSession(engine) as db:
+        await seed_data(db)
+        await backfill_ledger(db)
+
     yield
 
 app = FastAPI(
-    title="SAM IMS API",
+    title="StockWaves API",
     description="Inventory Management System with AI Assistant",
     version="1.0.0",
     lifespan=lifespan
@@ -69,7 +64,7 @@ FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
 async def root():
     if FRONTEND_DIST.is_dir():
         return FileResponse(str(FRONTEND_DIST / "index.html"))
-    return {"status": "online", "service": "SAM IMS API", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
+    return {"status": "online", "service": "StockWaves API", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
 
 # API v1 routes
 app.include_router(auth.router,       prefix="/api/v1/auth",       tags=["Auth"])
@@ -78,6 +73,7 @@ app.include_router(categories.router, prefix="/api/v1/categories", tags=["Catego
 app.include_router(suppliers.router,  prefix="/api/v1/suppliers",  tags=["Suppliers"])
 app.include_router(employees.router,  prefix="/api/v1/employees",  tags=["Employees"])
 app.include_router(sales.router,      prefix="/api/v1/sales",      tags=["Sales"])
+app.include_router(stock.router,      prefix="/api/v1/stock",      tags=["Stock ledger"])
 app.include_router(dashboard.router,  prefix="/api/v1/dashboard",  tags=["Dashboard"])
 app.include_router(chatbot.router,    prefix="/api/v1/chatbot",    tags=["AI Assistant"])
 app.include_router(uploader.router,   prefix="/api/v1/uploader",   tags=["Data Uploader"])

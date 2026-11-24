@@ -3,7 +3,8 @@ from pydantic import BaseModel
 import httpx
 from app.core.config import settings
 from app.core.database import get_db
-from app.models.schema import Product, Sale
+from app.models.schema import Product, Sale, User
+from app.core.deps import ANY_USER
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
@@ -17,7 +18,7 @@ class ChatRequest(BaseModel):
     message: str
 
 @router.post("/chat")
-async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat(request: ChatRequest, _: User = ANY_USER, db: AsyncSession = Depends(get_db)):
     if not settings.GROQ_API_KEY:
         raise HTTPException(status_code=500, detail="Groq API key not configured on server")
     
@@ -32,14 +33,17 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
         s_result = await db.execute(select(Sale).where(Sale.date >= thirty_days_ago))
         sales = s_result.scalars().all()
         
+        names = {p.id: p.name for p in products}
+
         # Format snapshot for AI context
         snapshot = {
             "inventory": [
-                {"name": p.name, "qty": p.qty, "min_stock": p.min_stock, "price": p.price} 
+                {"name": p.name, "qty": p.qty, "min_stock": p.min_stock, "price": p.price,
+                 "cost_price": p.cost_price, "lead_time_days": p.lead_time_days} 
                 for p in products
             ],
             "recent_sales_summary": [
-                {"prod_id": s.product_id, "qty": s.qty, "total": s.total_price, "date": s.date.strftime("%Y-%m-%d")}
+                {"product": names.get(s.product_id, s.product_id), "qty": s.qty, "total": s.total_price, "date": s.date.strftime("%Y-%m-%d")}
                 for s in sales
             ],
             "insights_request_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -47,7 +51,7 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
 
         # 2. SYSTEM PROMPT ENGINEERING (SNA P2)
         system_prompt = (
-            "You are the SAM IMS Intelligent Analyst. Your goal is to provide deep business insights using the provided data.\n"
+            "You are the StockWaves inventory analyst. Your goal is to provide deep business insights using the provided data.\n"
             "When asked about sales trends, analyze the correlation between stock levels and revenue.\n"
             "Format your responses using Markdown for readability (use headers, bold text, and bullet points).\n"
             "If you detect a product was low on stock during a period of low sales, point it out as a potential missed opportunity.\n"
@@ -81,6 +85,8 @@ async def chat(request: ChatRequest, db: AsyncSession = Depends(get_db)):
             data = response.json()
             return {"reply": data["choices"][0]["message"]["content"]}
             
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Chatbot error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="The assistant couldn't answer right now. Try again in a moment.")
