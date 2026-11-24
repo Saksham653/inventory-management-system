@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import ADMINS, ANY_USER, MANAGERS
-from app.models.schema import Product, Supplier, User
+from app.models.schema import Product, PurchaseOrder, Supplier, User
 
 router = APIRouter()
 
@@ -67,5 +67,9 @@ async def delete_supplier(supplier_id: int, _: User = ADMINS, db: AsyncSession =
     s = await db.get(Supplier, supplier_id)
     if not s:
         raise HTTPException(status_code=404, detail="Supplier not found")
+    orders = (await db.execute(select(func.count(PurchaseOrder.id)).where(PurchaseOrder.supplier_id == s.id))).scalar()
+    if orders:
+        raise HTTPException(status_code=409,
+                            detail=f"{s.name} has {orders} purchase order(s) on record, so it can't be deleted.")
     await db.execute(update(Product).where(Product.supplier_id == s.id).values(supplier_id=None))
     await db.delete(s)

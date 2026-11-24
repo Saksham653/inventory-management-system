@@ -101,6 +101,10 @@ async def update_po(po_id: int, body: POUpdate, _: User = MANAGERS, db: AsyncSes
     if body.lines is not None:
         if not body.lines:
             raise HTTPException(status_code=400, detail="An order needs at least one line")
+        ids = {l.product_id for l in body.lines}
+        found = set((await db.execute(select(Product.id).where(Product.id.in_(ids)))).scalars())
+        if ids - found:
+            raise HTTPException(status_code=400, detail=f"Unknown product id(s): {', '.join(map(str, sorted(ids - found)))}")
         po.lines = [PurchaseOrderLine(product_id=l.product_id, qty=l.qty, unit_cost=l.unit_cost or 0) for l in body.lines]
     await db.flush()
     return await po_out(db, po)
