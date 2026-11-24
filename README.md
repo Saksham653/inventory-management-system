@@ -9,7 +9,7 @@
 *Real-time stock control · Smart analytics · Built for teams*
 
 [![Landing Page](https://img.shields.io/badge/🌊_Landing_Page-Visit_Now-0f172a?style=for-the-badge)](https://saksham653.github.io/inventory-management-system/)
-[![Live Demo](https://img.shields.io/badge/🚀_Live_App-Open_Now-0066CC?style=for-the-badge)](https://inventory-management-system-ywux.onrender.com)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_App-Open_Now-0066CC?style=for-the-badge)](https://stockwaves.netlify.app)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-asyncpg-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
@@ -26,7 +26,7 @@
 
 > 🌊 **Landing Page:** [https://saksham653.github.io/inventory-management-system/](https://saksham653.github.io/inventory-management-system/)
 >
-> 🚀 **Live App:** [https://inventory-management-system-ywux.onrender.com](https://inventory-management-system-ywux.onrender.com)
+> 🚀 **Live App:** [https://stockwaves.netlify.app](https://stockwaves.netlify.app)
 
 ---
 
@@ -105,7 +105,7 @@ Inventory counted in rupees. Every morning the home screen answers three questio
 - Passwords hashed with **bcrypt** (cost factor 12)
 - Pydantic validation on all inputs — zero SQL injection risk
 - CORS restricted to frontend domain
-- HTTPS enforced automatically via Render (TLS)
+- HTTPS everywhere: Netlify and Railway both serve over TLS
 
 ---
 
@@ -118,7 +118,7 @@ Inventory counted in rupees. Every morning the home screen answers three questio
 | **Database** | PostgreSQL with asyncpg driver |
 | **Auth** | JWT via python-jose · bcrypt via passlib |
 | **AI** | Groq API (LLM chatbot) |
-| **Infra** | Docker multi-stage build · Render.com |
+| **Infra** | Frontend on Netlify · API + PostgreSQL on Railway (Docker) |
 | **Data** | Pandas · OpenPyXL (Excel import/export) |
 
 ---
@@ -166,9 +166,8 @@ stockwaves/
 │   └── logo.png              # StockWaves logo
 ├── main.py                   # FastAPI entry + static file serving
 ├── requirements.txt
-├── Dockerfile                # Multi-stage: Node build → Python serve
-├── render.yaml               # Render deployment config
-├── build.sh                  # Render build script
+├── Dockerfile                # Multi-stage: Node build → Python serve (used by Railway)
+├── netlify.toml              # Netlify build + /api proxy to Railway
 └── .env.example
 ```
 
@@ -210,23 +209,37 @@ API docs (Swagger UI): [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🌐 Deploy to Render
+## 🌐 Deployment
 
-1. Fork this repo to your GitHub account
-2. Go to [render.com](https://render.com) → **New → Web Service**
-3. Connect your repo → select **Docker** as the environment
-4. Add these environment variables in the Render dashboard:
+The live app runs on two hosts, and both redeploy automatically on every merge to `main`:
+
+| Part | Host | Details |
+|------|------|---------|
+| Frontend | **Netlify** | Builds `frontend/` per `netlify.toml`; proxies `/api/*` to Railway, so the browser only talks to one domain (no CORS setup) |
+| API | **Railway** | Builds the `Dockerfile`; always on, Singapore region |
+| Database | **Railway PostgreSQL** | Same project and region as the API |
+
+### Set up your own copy
+
+**1. API + database on Railway**
+1. Create a project, add a **PostgreSQL** database.
+2. Add a service from this GitHub repo (it builds the `Dockerfile`) and generate a public domain for it.
+3. Set these variables on the API service:
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (Railway reference to the database) |
 | `SECRET_KEY` | Random 256-bit string for JWT signing (required; without it logins reset on every restart) |
 | `SEED_DEMO` | `true` for the public demo data and logins, `false` for a real shop |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional first admin account, created when no users exist |
-| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com) |
-| `FRONTEND_URL` | Your Render service URL (for CORS) |
+| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com), for the AI assistant |
+| `FRONTEND_URL` | Your Netlify URL (for CORS) |
 
-5. Hit **Deploy** — Render handles the rest!
+Health check: `GET /api/v1/health` returns `{"status": "ok"}` when the API can reach the database.
+
+**2. Frontend on Netlify**
+1. In `netlify.toml`, point the `/api/*` redirect at your Railway domain.
+2. Import the repo in Netlify. The build settings come from `netlify.toml` (base `frontend`, command `npm run build`, publish `dist`).
 
 ---
 
@@ -273,7 +286,7 @@ Copy `.env.example` → `.env` and fill in:
 DATABASE_URL=postgresql+asyncpg://user:password@host/dbname   # omit locally to use SQLite
 SECRET_KEY=your-super-secret-256-bit-key
 GROQ_API_KEY=your-groq-api-key
-FRONTEND_URL=https://your-app.onrender.com
+FRONTEND_URL=https://your-site.netlify.app
 SEED_DEMO=true
 ```
 
@@ -299,7 +312,8 @@ Repository: [github.com/Saksham653/inventory-management-system](https://github.c
 
 - [FastAPI](https://fastapi.tiangolo.com) — Modern async Python web framework
 - [Groq](https://groq.com) — Ultra-fast LLM inference for the AI chatbot
-- [Render](https://render.com) — Seamless Docker-based cloud deployment
+- [Railway](https://railway.com) — Always-on hosting for the API and PostgreSQL
+- [Netlify](https://www.netlify.com) — Frontend hosting and the `/api` proxy
 - [Recharts](https://recharts.org) — Composable charting library for React
 
 ---
