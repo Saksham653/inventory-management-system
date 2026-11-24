@@ -60,12 +60,14 @@ async def log_requests(request: Request, call_next):
 
 # ── Serve built React frontend (production) ──────────────────────────────────
 FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
+# index.html must always be revalidated so a new deploy is picked up; hashed assets can be cached.
+NO_CACHE = {"Cache-Control": "no-cache"}
 
 # Root endpoint
 @app.get("/")
 async def root():
     if FRONTEND_DIST.is_dir():
-        return FileResponse(str(FRONTEND_DIST / "index.html"))
+        return FileResponse(str(FRONTEND_DIST / "index.html"), headers=NO_CACHE)
     return {"status": "online", "service": "StockWaves API", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
 
 # API v1 routes
@@ -92,4 +94,4 @@ if FRONTEND_DIST.is_dir():
         file_path = FRONTEND_DIST / full_path
         if file_path.is_file():
             return FileResponse(str(file_path))
-        return FileResponse(str(FRONTEND_DIST / "index.html"))
+        return FileResponse(str(FRONTEND_DIST / "index.html"), headers=NO_CACHE)

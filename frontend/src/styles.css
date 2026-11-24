@@ -168,7 +168,7 @@ a { color: var(--teal); }
 /* ---------- Page header ---------- */
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; }
 .page-head h1 { font-size: clamp(28px, 3vw, 38px); line-height: 1.02; letter-spacing: -0.045em; }
-.page-head h1 .grad { background: linear-gradient(90deg, #fff 10%, #ffb98a 55%, var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.page-head h1 .grad { color: var(--ink); }
 .page-head p { color: var(--ink-2); margin-top: 8px; max-width: 62ch; }
 .page-head .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -414,6 +414,85 @@ pre.sample { font-family: var(--f-mono); font-size: 12px; background: rgba(0, 0,
 @media (max-width: 520px) {
   .stats, .stats:has(> :nth-child(3):last-child) { grid-template-columns: 1fr; }
 }
+/* ---------- Brand: logo mark + wordmark ---------- */
+.brand-lockup { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); }
+.logo-mark { display: block; flex-shrink: 0; color: var(--ink); overflow: visible; }
+.lm-w { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.logo-mark.is-animated .lm-w { animation: lm-draw .9s var(--ease) both; }
+.logo-mark.is-animated .w3 { animation-delay: .1s; }
+.logo-mark.is-animated .w2 { animation-delay: .25s; }
+.logo-mark.is-animated .w1 { animation-delay: .4s; animation-duration: 1.1s; }
+@keyframes lm-draw { from { stroke-dashoffset: 1; } }
+.wordmark { font-weight: 600; letter-spacing: -0.045em; white-space: nowrap; color: var(--ink); line-height: 1; }
+.brand { gap: 10px; padding-left: 22px; }
+
+/* ---------- Auth page ---------- */
+.auth { position: relative; min-height: 100%; overflow: hidden; display: grid; grid-template-rows: auto 1fr; isolation: isolate; --px: 30vw; --py: 40vh; }
+.auth-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); }
+.auth-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; filter: saturate(0) contrast(1.15) brightness(.9); animation: fade 2s var(--ease) both; }
+.auth-tint { position: absolute; inset: 0; mix-blend-mode: color; background: linear-gradient(110deg, var(--orange) 0%, #ff9a55 30%, var(--teal) 75%); opacity: .85; }
+.auth-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1.2px); background-size: 18px 18px; mask-image: linear-gradient(90deg, #000, transparent 70%); }
+.auth-orb { position: absolute; width: 52vw; height: 52vw; max-width: 760px; max-height: 760px; border-radius: 50%; filter: blur(120px); opacity: .16; }
+.auth-orb.o { background: var(--orange); left: -18vw; bottom: -20vh; animation: drift-a 20s var(--ease) infinite alternate; }
+.auth-orb.t { background: var(--teal); right: -20vw; top: -24vh; animation: drift-b 24s var(--ease) infinite alternate; }
+.auth-pointer { position: absolute; inset: 0; background: radial-gradient(520px circle at var(--px) var(--py), rgba(255, 255, 255, .07), transparent 60%); transition: background .2s; }
+.auth-vignette { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 9, 10, .62), rgba(8, 9, 10, .25) 45%, transparent 65%), radial-gradient(ellipse 90% 80% at 50% 45%, transparent 35%, rgba(8, 9, 10, .85) 100%), linear-gradient(180deg, rgba(8, 9, 10, .5), transparent 25%, transparent 70%, rgba(8, 9, 10, .9)); }
+
+.auth-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px max(20px, 4vw); animation: rise .6s var(--ease) both; }
+.auth-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); padding: 6px 12px; border-radius: 99px; background: rgba(8, 9, 10, .45); backdrop-filter: blur(10px); box-shadow: 0 0 0 1px var(--line) inset; }
+.auth-main { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 440px); gap: clamp(28px, 5vw, 80px); align-items: center; padding: 16px max(20px, 4vw) 56px; max-width: 1280px; width: 100%; margin: 0 auto; }
+
+.auth-hero { display: grid; justify-items: start; gap: 22px; }
+.auth-title { font-size: clamp(42px, 6vw, 84px); line-height: .98; letter-spacing: -0.058em; font-weight: 600; max-width: 12ch; }
+.auth-title .w { display: inline-block; animation: word .8s var(--ease) both; white-space: pre; }
+.auth-title .money { color: var(--teal); }
+@keyframes word { from { opacity: 0; transform: translateY(40%) rotate(4deg); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+.auth-sub { color: var(--ink-2); font-size: clamp(15px, 1.3vw, 18px); max-width: 46ch; animation: rise .8s var(--ease) both .9s; }
+
+.auth-ticker { display: flex; align-items: center; gap: 12px; width: min(100%, 480px); padding: 8px 8px 8px 12px; border-radius: 16px; background: rgba(12, 13, 15, .6); backdrop-filter: blur(14px); box-shadow: 0 0 0 1px var(--line-2) inset, 0 20px 50px -20px rgba(0, 0, 0, .8); animation: rise .8s var(--ease) both 1.05s; }
+.tk-label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); padding: 3px 8px; border-radius: 7px; background: var(--money-soft); }
+.tk-window { position: relative; flex: 1; height: 36px; overflow: hidden; }
+.tk-row { position: absolute; inset: 0; display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink-2); opacity: 0; transform: translateY(100%); transition: transform .6s var(--spring), opacity .4s; }
+.tk-row.on { opacity: 1; transform: none; }
+.tk-row.off { opacity: 0; transform: translateY(-100%); }
+.tk-row .tk-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tk-row .num { padding-right: 6px; }
+
+.auth-side { animation: card-in .9s var(--ease) both .3s; }
+@keyframes card-in { from { opacity: 0; transform: translateY(30px) scale(.97); filter: blur(8px); } }
+.auth-card-wrap { position: relative; border-radius: 22px; padding: 1px; background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .05)); box-shadow: 0 40px 100px -30px rgba(0, 0, 0, .9); }
+.auth-card { position: relative; border-radius: 21px; padding: 30px; background: linear-gradient(180deg, rgba(22, 23, 26, .94), rgba(11, 12, 14, .96)); backdrop-filter: blur(20px); }
+.auth-card-head { margin-bottom: 22px; }
+.auth-card-head h2 { font-size: 26px; letter-spacing: -0.045em; }
+.auth-card-head p { font-size: 13.5px; margin-top: 4px; }
+.auth-card::before { content: ""; position: absolute; left: 20%; right: 20%; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .5), transparent); }
+.pw { position: relative; }
+.pw .input { padding-right: 44px; }
+.pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: pointer; }
+.pw-toggle:hover { color: var(--ink); background: var(--hover); }
+.auth-submit { height: 46px; font-size: 15px; margin-top: 4px; }
+.auth-demo { margin-top: 22px; }
+.auth-demo-label { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-3); margin-bottom: 10px; }
+.auth-demo-label span { flex: 1; height: 1px; background: var(--line); }
+.auth-demo-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.demo-chip { display: grid; gap: 2px; text-align: left; padding: 10px 11px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .025); color: var(--ink-3); cursor: pointer; transition: border-color .25s, background .25s, transform .3s var(--spring); min-width: 0; }
+.demo-chip b { font-weight: 500; font-size: 13px; color: var(--ink); text-transform: capitalize; }
+.demo-chip span { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.demo-chip:hover { border-color: var(--line-2); transform: translateY(-2px); }
+.demo-chip.on { border-color: rgba(34, 224, 188, .6); background: var(--money-soft); box-shadow: 0 0 24px -8px var(--teal); }
+.auth-foot { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11.5px; color: var(--ink-3); margin-top: 18px; }
+
+@media (max-width: 960px) {
+  .auth-main { grid-template-columns: minmax(0, 1fr); }
+  .auth-title { font-size: clamp(38px, 10vw, 60px); }
+  .auth-live { display: none; }
+}
+@media (max-width: 520px) {
+  .auth-card { padding: 22px 18px; }
+  .auth-demo-row { grid-template-columns: 1fr; }
+  .auth-ticker { display: none; }
+  }
+
 /* ---------- Today / Paisa Radar ---------- */
 .today-top { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; margin-bottom: 14px; }
 .hero-card { padding: 26px 28px; height: 100%; }
