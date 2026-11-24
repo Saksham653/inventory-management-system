@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.database import engine
 from app.core.migrate import upgrade_schema, backfill_ledger, startup_lock
 from app.core.seed import seed_data
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders
 
@@ -69,6 +70,14 @@ async def root():
     if FRONTEND_DIST.is_dir():
         return FileResponse(str(FRONTEND_DIST / "index.html"), headers=NO_CACHE)
     return {"status": "online", "service": "StockWaves API", "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
+
+
+@app.get("/api/v1/health", tags=["Health"])
+async def health():
+    """Used by the host's health check: the app is up and can reach the database."""
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT 1"))
+    return {"status": "ok"}
 
 # API v1 routes
 app.include_router(auth.router,       prefix="/api/v1/auth",       tags=["Auth"])
