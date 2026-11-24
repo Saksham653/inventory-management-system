@@ -8,6 +8,7 @@ import { initials } from "../lib/format"
 import { useSpotlight } from "../lib/motion"
 import { Pill } from "./ui"
 import CommandPalette from "./CommandPalette"
+import { LogoMark, Wordmark } from "./Brand"
 
 export const PAGES = [
   { id: "today", label: "Today", icon: Sun, group: "Shop" },
@@ -23,17 +24,6 @@ export const PAGES = [
   { id: "import", label: "Import data", icon: Upload, group: "Setup", needs: "manage" },
   { id: "assistant", label: "Assistant", icon: Bot, group: "Tools" },
 ]
-
-export function Logo({ size = 18 }) {
-  // Three stacked waves: stock flowing in.
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-      <path d="M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />
-      <path d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0" opacity=".75" />
-      <path d="M3 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0" opacity=".45" />
-    </svg>
-  )
-}
 
 export function Ambient() {
   return <div className="ambient" aria-hidden="true"><div className="glow o" /><div className="glow t" /></div>
@@ -73,8 +63,8 @@ export default function Shell({ page, setPage, openProduct, children }) {
       <div className={`shell ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}>
         <aside className="side">
           <div className="brand">
-            <span className="brand-mark"><Logo /></span>
-            <span className="brand-name">StockWaves</span>
+            <LogoMark size={26} />
+            <span className="brand-name"><Wordmark size={18} /></span>
           </div>
           <button className="side-cmd" onClick={() => setCmdk(true)} title="Search (Ctrl K)">
             <Search size={16} /><span>Search</span><kbd>Ctrl K</kbd>
