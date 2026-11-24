@@ -32,13 +32,13 @@
 
 ## 🔑 Demo Access
 
-Try it instantly — no sign-up required:
+Try it instantly — no sign-up required. These accounts exist only when `SEED_DEMO=true` (the default); passwords are checked by the server and stored as bcrypt hashes.
 
 | Role | Email | Password | Permissions |
 |------|-------|----------|-------------|
 | 🔴 **Admin** | `admin@sam.com` | `admin123` | Full access to all modules |
 | 🟡 **Manager** | `manager@sam.com` | `pass123` | Products, Sales, Suppliers |
-| 🟢 **Staff** | `staff@sam.com` | `pass123` | View & record sales only |
+| 🟢 **Staff** | `staff@sam.com` | `pass123` | View stock & record sales |
 
 ---
 
@@ -50,9 +50,15 @@ Try it instantly — no sign-up required:
 - Category distribution with animated PieChart
 - Recent sales feed with real-time updates
 
+### 📒 Stock Ledger
+- Every stock change (opening stock, stock in, sale, correction, return, voided sale) is an append-only ledger entry
+- A product's quantity always equals the sum of its ledger entries, with who made each change and when
+- Per-product stock history one click away from the product list
+
 ### 📦 Product Management
 - Full CRUD — create, search, edit, delete products
 - SKU tracking, brand tagging, category & supplier linkage
+- Cost price and selling price, so margin and money-in-stock are visible
 - Stock quantity with configurable **low-stock threshold** alerts
 - Auto stock-deduction on every recorded sale
 
@@ -83,7 +89,8 @@ Try it instantly — no sign-up required:
 - Built-in validation with row-level error reporting
 
 ### 🔐 Security
-- JWT authentication (30-min access · 7-day refresh tokens)
+- Server-side JWT authentication (30-min access · 7-day refresh tokens); every API route requires a valid token
+- Role checks enforced by the API: staff can view and sell, managers manage stock and catalogue, admins delete and manage people
 - Passwords hashed with **bcrypt** (cost factor 12)
 - Pydantic validation on all inputs — zero SQL injection risk
 - CORS restricted to frontend domain
@@ -117,19 +124,29 @@ stockwaves/
 │   │   ├── suppliers.py      # Supplier CRUD
 │   │   ├── employees.py      # Employee CRUD
 │   │   ├── sales.py          # Sales + auto stock deduction
+│   │   ├── stock.py          # Stock ledger & adjustments
 │   │   ├── dashboard.py      # Analytics & KPIs
 │   │   ├── chatbot.py        # AI assistant (Groq)
 │   │   └── uploader.py       # Excel/CSV bulk import
 │   ├── core/
 │   │   ├── config.py         # Environment settings (Pydantic)
 │   │   ├── database.py       # Async SQLAlchemy engine
-│   │   └── seed.py           # Initial data seeder
+│   │   ├── security.py       # bcrypt + JWT helpers
+│   │   ├── deps.py           # Auth & role dependencies
+│   │   ├── migrate.py        # Adds new columns to existing databases
+│   │   └── seed.py           # Demo users & sample shop
+│   ├── services/
+│   │   ├── stock.py          # The only code that changes stock (writes the ledger)
+│   │   └── insights.py       # Days of cover & reorder risk
 │   └── models/
 │       └── schema.py         # ORM models
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx           # Full React SPA
-│   │   └── main.jsx
+│   │   ├── App.jsx           # Auth gate + page routing
+│   │   ├── styles.css        # Design tokens (light + dark)
+│   │   ├── lib/              # API client, auth context, formatting
+│   │   ├── components/       # Shell + shared UI
+│   │   └── pages/            # Dashboard, Products, Sales, Ledger, …
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
@@ -162,7 +179,7 @@ Visit: [http://localhost:8000](http://localhost:8000)
 
 ### Option B — Manual
 
-**Backend:**
+**Backend** (uses a local SQLite file when `DATABASE_URL` is not set, so no Postgres is needed for development):
 ```bash
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
@@ -191,7 +208,9 @@ API docs (Swagger UI): [http://localhost:8000/docs](http://localhost:8000/docs)
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `SECRET_KEY` | Random 256-bit string for JWT signing |
+| `SECRET_KEY` | Random 256-bit string for JWT signing (required; without it logins reset on every restart) |
+| `SEED_DEMO` | `true` for the public demo data and logins, `false` for a real shop |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional first admin account, created when no users exist |
 | `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com) |
 | `FRONTEND_URL` | Your Render service URL (for CORS) |
 
@@ -205,21 +224,26 @@ All endpoints require `Authorization: Bearer <token>` except login and register.
 
 | Method | Endpoint | Role | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/v1/auth/login` | Public | Login → returns JWT |
-| `POST` | `/api/v1/auth/register` | Public | Register new user |
+| `POST` | `/api/v1/auth/login` | Public | Login → access + refresh tokens |
+| `POST` | `/api/v1/auth/refresh` | Public | Exchange a refresh token for new tokens |
+| `GET` | `/api/v1/auth/me` | Any | Current user |
+| `POST` | `/api/v1/auth/users` | Admin | Create a login for a team member |
 | `GET` | `/api/v1/dashboard/stats` | Any | KPIs & analytics |
 | `GET` | `/api/v1/products/` | Any | List all products |
 | `POST` | `/api/v1/products/` | Admin/Manager | Create product |
 | `PATCH` | `/api/v1/products/{id}` | Admin/Manager | Update product |
 | `DELETE` | `/api/v1/products/{id}` | Admin | Delete product |
 | `GET` | `/api/v1/sales/` | Any | Sales history |
-| `POST` | `/api/v1/sales/` | Any | Record sale (auto-deducts stock) |
-| `GET` | `/api/v1/employees/` | Any | List employees |
+| `POST` | `/api/v1/sales/` | Any | Record sale (server sets price, deducts stock via ledger) |
+| `DELETE` | `/api/v1/sales/{id}` | Admin | Void a sale and return its stock |
+| `GET` | `/api/v1/stock/movements` | Any | Stock ledger (filter by `product_id`) |
+| `POST` | `/api/v1/stock/adjust` | Admin/Manager | Stock in, return or correction |
+| `GET` | `/api/v1/employees/` | Admin/Manager | List employees |
 | `POST` | `/api/v1/employees/` | Admin | Add employee |
 | `GET` | `/api/v1/suppliers/` | Any | List suppliers |
 | `POST` | `/api/v1/suppliers/` | Admin/Manager | Create supplier |
 | `POST` | `/api/v1/chatbot/chat` | Any | AI assistant query |
-| `POST` | `/api/v1/uploader/` | Admin/Manager | Bulk import via Excel |
+| `POST` | `/api/v1/uploader/upload` | Admin/Manager | Bulk import via CSV/Excel/JSON/XML |
 
 Full interactive docs available at `/docs` when running locally.
 
@@ -230,11 +254,14 @@ Full interactive docs available at `/docs` when running locally.
 Copy `.env.example` → `.env` and fill in:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://user:password@host/dbname
+DATABASE_URL=postgresql+asyncpg://user:password@host/dbname   # omit locally to use SQLite
 SECRET_KEY=your-super-secret-256-bit-key
 GROQ_API_KEY=your-groq-api-key
 FRONTEND_URL=https://your-app.onrender.com
+SEED_DEMO=true
 ```
+
+Existing databases are upgraded automatically on startup: new columns are added and every product gets an opening ledger entry.
 
 ---
 
