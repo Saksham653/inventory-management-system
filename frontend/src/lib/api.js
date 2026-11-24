@@ -60,7 +60,9 @@ export async function api(path, { method = "GET", body, form, retry = true } = {
 
   const res = await fetch(BASE + path, { method, headers, body: payload })
 
-  if (res.status === 401 && retry && session?.refresh_token && !path.startsWith("/auth/")) {
+  // Login and refresh failures are final; anything else (including /auth/me on page load) retries once with a fresh token.
+  const isAuthCall = path === "/auth/login" || path === "/auth/refresh"
+  if (res.status === 401 && retry && session?.refresh_token && !isAuthCall) {
     if (await refresh()) return api(path, { method, body, form, retry: false })
     setSession(null)
     onLogout()

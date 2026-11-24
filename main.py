@@ -9,7 +9,7 @@ from pathlib import Path
 
 from app.core.config import settings
 from app.core.database import engine
-from app.core.migrate import upgrade_schema, backfill_ledger
+from app.core.migrate import upgrade_schema, backfill_ledger, startup_lock
 from app.core.seed import seed_data
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders
@@ -21,10 +21,12 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create/upgrade tables, seed demo data, make sure every product has ledger history.
-    await upgrade_schema(engine)
-    async with AsyncSession(engine) as db:
-        await seed_data(db)
-        await backfill_ledger(db)
+    # Production runs several workers; a Postgres advisory lock makes them take turns.
+    async with startup_lock(engine):
+        await upgrade_schema(engine)
+        async with AsyncSession(engine) as db:
+            await seed_data(db)
+            await backfill_ledger(db)
 
     yield
 

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.deps import ADMINS, ANY_USER, MANAGERS
-from app.models.schema import PriceTier, Product, Sale, StockMovement, User
+from app.models.schema import PriceTier, Product, PurchaseOrderLine, Sale, StockMovement, User
 from app.services.insights import replenishment_report
 from app.services.stock import record_movement
 
@@ -116,6 +116,10 @@ async def delete_product(product_id: int, _: User = ADMINS, db: AsyncSession = D
     if sales:
         raise HTTPException(status_code=409,
                             detail=f"{p.name} has {sales} sales on record, so it can't be deleted. Set its stock to 0 instead.")
+    orders = (await db.execute(select(func.count(PurchaseOrderLine.id)).where(PurchaseOrderLine.product_id == p.id))).scalar()
+    if orders:
+        raise HTTPException(status_code=409,
+                            detail=f"{p.name} is on {orders} purchase order line(s), so it can't be deleted. Set its stock to 0 instead.")
     await db.execute(delete(StockMovement).where(StockMovement.product_id == p.id))
     await db.delete(p)
 

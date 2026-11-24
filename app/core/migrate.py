@@ -6,6 +6,7 @@ missing nullable columns, then backfills an opening ledger row for products
 that have stock but no history.
 """
 import logging
+from contextlib import asynccontextmanager
 
 from sqlalchemy import inspect, select, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
@@ -14,6 +15,22 @@ from app.core.database import Base
 from app.models.schema import Product, StockMovement
 
 logger = logging.getLogger(__name__)
+
+STARTUP_LOCK_ID = 7_270_301  # any constant; shared by every worker of this app
+
+
+@asynccontextmanager
+async def startup_lock(engine: AsyncEngine):
+    """Serialise startup work across workers. Postgres only; SQLite runs a single process locally."""
+    if engine.dialect.name != "postgresql":
+        yield
+        return
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT pg_advisory_lock(:id)"), {"id": STARTUP_LOCK_ID})
+        try:
+            yield
+        finally:
+            await conn.execute(text("SELECT pg_advisory_unlock(:id)"), {"id": STARTUP_LOCK_ID})
 
 
 def _add_missing_columns(sync_conn) -> list[str]:
@@ -29,7 +46,8 @@ def _add_missing_columns(sync_conn) -> list[str]:
             if col.name in have:
                 continue
             col_type = col.type.compile(dialect=dialect)
-            sync_conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col_type}'))
+            guard = "IF NOT EXISTS " if dialect.name == "postgresql" else ""
+            sync_conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN {guard}"{col.name}" {col_type}'))
             added.append(f"{table.name}.{col.name}")
     return added
 
