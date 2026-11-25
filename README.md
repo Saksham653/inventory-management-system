@@ -51,6 +51,14 @@ Inventory counted in rupees. Every morning the home screen answers three questio
 - **What should I do today?** Ranked actions by rupees at stake: reorder, bundle with a fast seller, a discount that stays above cost, return extra stock to the supplier.
 - **How is this calculated?** Every figure opens the formula with your real numbers, and links to the ledger rows behind it.
 
+### 📸 Snap-a-Bill (Stock in)
+- Photograph or upload a supplier bill, printed or handwritten; a vision model reads every item line, quantity and rate
+- Each line is matched to your products (handles abbreviations, typos and SKUs), or pre-filled as a new product
+- Review screen beside the photo: fix a match, quantity or cost, skip a line; totals are checked against the bill
+- Confirm and every line goes into stock through the ledger, with the latest cost price; the photo is kept with the bill
+- Learns each supplier's naming: once you confirm "Apple 20W adptr" is your adapter, their next bill matches it automatically
+- Works with Claude (`ANTHROPIC_API_KEY`) or Groq (`GROQ_API_KEY`)
+
 ### 🧾 Purchase Orders
 - One click turns Paisa Radar's reorder list into draft purchase orders, one per supplier
 - Edit quantities, mark as sent, then **Stock arrived** adds every line to stock through the ledger and updates cost prices
@@ -149,6 +157,8 @@ stockwaves/
 │   ├── services/
 │   │   ├── stock.py          # The only code that changes stock (writes the ledger)
 │   │   ├── radar.py          # Paisa Radar calculations
+│   │   ├── bill_reader.py    # Reads bill photos with Claude or Groq
+│   │   ├── matching.py       # Matches bill lines to products, learns aliases
 │   │   └── insights.py       # Days of cover & reorder risk
 │   └── models/
 │       └── schema.py         # ORM models
@@ -232,7 +242,10 @@ The live app runs on two hosts, and both redeploy automatically on every merge t
 | `SECRET_KEY` | Random 256-bit string for JWT signing (required; without it logins reset on every restart) |
 | `SEED_DEMO` | `true` for the public demo data and logins, `false` for a real shop |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Optional first admin account, created when no users exist |
-| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com), for the AI assistant |
+| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com), for the AI assistant (and bill scanning if no Anthropic key is set) |
+| `ANTHROPIC_API_KEY` | Optional. From [platform.claude.com](https://platform.claude.com); used for bill scanning when set |
+| `BILL_AI_PROVIDER` | Optional: `anthropic` or `groq` to force one; empty picks whichever key is set (Anthropic first) |
+| `BILL_AI_MODEL` | Optional model override (defaults: `claude-opus-5-5`, `qwen/qwen3.8-27b`) |
 | `FRONTEND_URL` | Your Netlify URL (for CORS) |
 
 Health check: `GET /api/v1/health` returns `{"status": "ok"}` when the API can reach the database.
@@ -256,6 +269,9 @@ All endpoints require `Authorization: Bearer <token>` except login and register.
 | `GET` | `/api/v1/dashboard/stats` | Any | KPIs & analytics |
 | `GET` | `/api/v1/radar/` | Any | Paisa Radar: stuck cash, reorder list, ranked actions |
 | `GET` | `/api/v1/purchase-orders/` | Any | Purchase orders |
+| `POST` | `/api/v1/bills/scan` | Admin/Manager | Read a bill photo into a draft with matched lines |
+| `PATCH` | `/api/v1/bills/{id}` | Admin/Manager | Edit a draft bill's supplier, matches, quantities and costs |
+| `POST` | `/api/v1/bills/{id}/post` | Admin/Manager | Add the bill to stock through the ledger |
 | `POST` | `/api/v1/purchase-orders/draft-from-radar` | Admin/Manager | Draft POs from the reorder list |
 | `POST` | `/api/v1/purchase-orders/{id}/receive` | Admin/Manager | Receive stock into the ledger |
 | `GET` | `/api/v1/products/` | Any | List all products |

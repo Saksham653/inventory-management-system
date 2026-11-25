@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard"
 import Today from "./pages/Today"
 import Radar from "./pages/Radar"
 import Orders from "./pages/Orders"
+import StockIn from "./pages/StockIn"
 import Products from "./pages/Products"
 import Sales from "./pages/Sales"
 import Ledger from "./pages/Ledger"
@@ -48,6 +49,7 @@ function Workspace() {
     today: <Today setPage={setPage} openLedger={openLedger} />,
     radar: <Radar openLedger={openLedger} />,
     orders: <Orders setPage={setPage} />,
+    stockin: <StockIn openLedger={openLedger} />,
     dashboard: <Dashboard setPage={setPage} />,
     products: <Products openLedger={openLedger} />,
     sales: <Sales />,
