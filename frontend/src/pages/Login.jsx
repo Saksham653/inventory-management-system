@@ -76,7 +76,7 @@ export default function Login() {
       </div>
 
       <header className="auth-nav">
-        <span className="brand-lockup"><LogoMark size={28} animated /><Wordmark size={19} /></span>
+        <a className="brand-lockup" href="#home" aria-label="StockWaves home" style={{ textDecoration: "none" }}><LogoMark size={28} animated /><Wordmark size={19} /></a>
         <span className="auth-live">Inventory, counted in rupees</span>
       </header>
 

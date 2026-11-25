@@ -8,6 +8,7 @@ import { useToast } from "../lib/motion"
 import { dateTime, initials } from "../lib/format"
 import { Alert, Button, PageHead, Pill, Segmented, Switch } from "../components/ui"
 import { LogoMark } from "../components/Brand"
+import { WaText } from "../components/WaText"
 
 const DAYS = [{ value: "daily", label: "Every day" }, { value: "mon-sat", label: "Mon–Sat" }]
 const LANGS = [{ value: "en", label: "English" }, { value: "hi", label: "Hinglish" }]
@@ -29,21 +30,6 @@ function nextLabel(iso) {
   if (!iso) return null
   const d = new Date(iso)
   return d.toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })
-}
-
-// WhatsApp formatting: *bold*, _italic_, and links.
-function WaText({ text }) {
-  return text.split("\n").map((line, i) => (
-    <Fragment key={i}>
-      {i > 0 && <br />}
-      {line.split(/(\*[^*\n]+\*|_[^_\n]+_|https?:\/\/\S+)/g).map((part, j) => {
-        if (/^\*[^*]+\*$/.test(part)) return <b key={j}>{part.slice(1, -1)}</b>
-        if (/^_[^_]+_$/.test(part)) return <i key={j}>{part.slice(1, -1)}</i>
-        if (/^https?:\/\//.test(part)) return <a key={j} href={part} target="_blank" rel="noreferrer">{part.replace(/^https?:\/\//, "")}</a>
-        return part
-      })}
-    </Fragment>
-  ))
 }
 
 function Ticks({ m }) {

@@ -21,6 +21,7 @@ export function AuthProvider({ children }) {
     const s = await api("/auth/login", { method: "POST", body: { email, password } })
     setSession(s)
     setUser(s.user)
+    try { localStorage.setItem("sw:returning", "1") } catch { /* storage blocked */ }
   }
 
   const logout = () => {
