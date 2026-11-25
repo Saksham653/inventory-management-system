@@ -1,6 +1,6 @@
 from datetime import timezone
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import TypeDecorator
@@ -177,3 +177,73 @@ class PurchaseOrderLine(Base):
     unit_cost = Column(Float, default=0)
 
     order = relationship("PurchaseOrder", back_populates="lines")
+
+
+# ---------------- Snap-a-Bill ----------------
+BILL_STATUSES = ("draft", "posted", "discarded")
+BILL_LINE_ACTIONS = ("match", "create", "skip")
+
+
+class SupplierBill(Base):
+    """A supplier invoice read from a photo. Draft until a manager confirms it into stock."""
+    __tablename__ = "supplier_bills"
+
+    id = Column(Integer, primary_key=True, index=True)
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"))
+    supplier_name_raw = Column(String)      # as printed on the bill
+    bill_no = Column(String)
+    bill_date = Column(String)              # as read; usually YYYY-MM-DD
+    status = Column(String, nullable=False, default="draft")
+    subtotal_on_bill = Column(Float)
+    tax_on_bill = Column(Float)
+    total_on_bill = Column(Float)
+    reader = Column(String)                 # e.g. "anthropic:claude-opus-5-5"
+    reader_notes = Column(String)
+    created_by = Column(String)
+    created_at = Column(UTCDateTime, server_default=func.now())
+    posted_by = Column(String)
+    posted_at = Column(UTCDateTime)
+
+    lines = relationship("SupplierBillLine", back_populates="bill", cascade="all, delete-orphan",
+                         lazy="selectin", order_by="SupplierBillLine.position")
+
+
+class SupplierBillLine(Base):
+    __tablename__ = "supplier_bill_lines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    bill_id = Column(Integer, ForeignKey("supplier_bills.id"), index=True, nullable=False)
+    position = Column(Integer, nullable=False, default=0)
+    raw_text = Column(String)               # the line as written on the bill
+    qty = Column(Float)
+    unit_cost = Column(Float)
+    amount_on_bill = Column(Float)
+    action = Column(String, nullable=False, default="match")
+    product_id = Column(Integer, ForeignKey("products.id"))
+    match_score = Column(Float)
+    new_name = Column(String)               # used when action == "create"
+    new_sku = Column(String)
+    new_price = Column(Float)
+
+    bill = relationship("SupplierBill", back_populates="lines")
+
+
+class SupplierBillImage(Base):
+    """The original photo, kept with the bill for audit. Stored in the database (no disk on the host)."""
+    __tablename__ = "supplier_bill_images"
+
+    id = Column(Integer, primary_key=True)
+    bill_id = Column(Integer, ForeignKey("supplier_bills.id"), unique=True, nullable=False)
+    mime = Column(String, nullable=False)
+    data = Column(LargeBinary, nullable=False)
+
+
+class ProductAlias(Base):
+    """How a supplier writes a product on their bills, learned when a manager confirms a match."""
+    __tablename__ = "product_aliases"
+
+    id = Column(Integer, primary_key=True)
+    alias = Column(String, index=True, nullable=False)   # normalised text
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"))
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    created_at = Column(UTCDateTime, server_default=func.now())
