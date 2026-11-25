@@ -247,3 +247,28 @@ class ProductAlias(Base):
     supplier_id = Column(Integer, ForeignKey("suppliers.id"))
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     created_at = Column(UTCDateTime, server_default=func.now())
+
+
+# ---------------- Command bar ----------------
+ACTION_STATUSES = ("proposed", "done", "undone", "answered", "failed", "expired")
+
+
+class AssistantAction(Base):
+    """Every command typed in the command bar: what was asked, the preview shown, and what ran.
+    Actions only run after the person confirms the preview, and most can be undone."""
+    __tablename__ = "assistant_actions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    user_name = Column(String)
+    command = Column(String, nullable=False)
+    kind = Column(String, nullable=False)
+    interpreted_by = Column(String)   # "rules" or "anthropic:<model>" / "groq:<model>"
+    plan = Column(String)             # JSON: resolved parameters
+    preview = Column(String)          # JSON: what the person saw before confirming
+    result = Column(String)           # JSON: ids needed to undo
+    status = Column(String, nullable=False, default="proposed")
+    error = Column(String)
+    created_at = Column(UTCDateTime, server_default=func.now())
+    executed_at = Column(UTCDateTime)
+    undone_at = Column(UTCDateTime)

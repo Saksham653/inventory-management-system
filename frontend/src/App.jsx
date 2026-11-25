@@ -58,7 +58,7 @@ function Workspace() {
     suppliers: <Suppliers />,
     team: <Team />,
     import: <Import />,
-    assistant: <Assistant />,
+    assistant: <Assistant setPage={setPage} openLedger={openLedger} />,
   }[page]
 
   return <Shell page={allowed ? page : "today"} setPage={setPage} openProduct={openLedger}>{view}</Shell>

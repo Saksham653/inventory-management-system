@@ -22,5 +22,13 @@ export function useApi(path, fallback = null) {
 
   useEffect(() => { reload() }, [reload])
 
+  // Refresh when a command-bar action changes data elsewhere on the page.
+  useEffect(() => {
+    if (!path) return
+    const onChange = () => reload()
+    window.addEventListener("sw:data-changed", onChange)
+    return () => window.removeEventListener("sw:data-changed", onChange)
+  }, [path, reload])
+
   return { data, loading, error, reload, setData }
 }

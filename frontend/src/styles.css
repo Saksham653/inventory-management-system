@@ -572,6 +572,51 @@ pre.sample { font-family: var(--f-mono); font-size: 12px; background: rgba(0, 0,
   .bl-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ---------- Command bar ---------- */
+.top-cmd { display: flex; align-items: center; gap: 10px; width: min(420px, 40vw); height: 36px; padding: 0 12px; border-radius: 11px;
+  border: 1px solid var(--line); background: rgba(255, 255, 255, .03); color: var(--ink-3); cursor: pointer; font-size: 13px;
+  transition: border-color .2s, color .2s, background .2s; }
+.top-cmd:hover { border-color: var(--line-2); color: var(--ink-2); background: rgba(255, 255, 255, .05); }
+.top-cmd span { flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmdk-item.is-command { color: var(--ink); }
+.cmdk-item.is-command svg { color: var(--teal); }
+.cmdk-item.is-command b { font-weight: 500; }
+.cmdk-result { padding: 14px; max-height: 60vh; overflow-y: auto; }
+.cmdk-foot span + span { margin-left: 4px; }
+.toast-action { border: 0; background: rgba(255, 255, 255, .1); color: var(--ink); font-weight: 500; font-size: 12.5px; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+.toast-action:hover { background: rgba(255, 255, 255, .18); }
+
+.cr { display: grid; gap: 12px; animation: pop .3s var(--spring) both; }
+.cr-loading { display: flex; align-items: center; gap: 10px; color: var(--ink-2); padding: 18px 4px; }
+.cr-head { display: flex; align-items: flex-start; gap: 12px; }
+.cr-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; color: var(--teal); background: var(--money-soft); box-shadow: 0 0 0 1px rgba(34, 224, 188, .22) inset; }
+.cr-title { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); }
+.cr-cmd { font-size: 12.5px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr-summary { color: var(--ink-2); font-size: 13.5px; }
+.cr-answer { color: var(--ink); font-size: 14.5px; line-height: 1.6; white-space: pre-wrap; }
+.cr-table { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.cr-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--line); font-size: 13px; }
+.cr-row:first-child { border-top: 0; }
+.cr-row > div { display: grid; gap: 1px; min-width: 0; }
+.cr-row b { font-weight: 500; color: var(--ink); }
+.cr-row .faint { font-size: 11.5px; }
+.cr-strong { color: var(--ink); }
+.cr-delta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); font-size: 14px; }
+.cr-warn, .cr-block { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; border-radius: 10px; padding: 8px 10px; }
+.cr-warn { color: var(--amber); background: var(--warn-soft); }
+.cr-block { color: #ff8a8e; background: var(--crit-soft); }
+.cr-warn svg, .cr-block svg { flex-shrink: 0; margin-top: 1px; }
+.cr-sugg { display: flex; gap: 6px; flex-wrap: wrap; }
+.cr-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; padding-top: 4px; border-top: 1px solid var(--line); padding-top: 12px; }
+.cr-kbd { margin-left: 4px; border-color: rgba(0, 0, 0, .2); color: rgba(0, 0, 0, .55); background: rgba(0, 0, 0, .06); display: inline-flex; align-items: center; padding: 1px 4px; }
+.assistant-input { display: flex; align-items: center; gap: 10px; }
+.assistant-input .input { height: 46px; font-size: 15px; border-radius: 12px; }
+
+@media (max-width: 760px) {
+  .cr-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .cr-row > .num:nth-child(2) { display: none; }
+}
+
 /* ---------- Today / Paisa Radar ---------- */
 .today-top { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; margin-bottom: 14px; }
 .hero-card { padding: 26px 28px; height: 100%; }
