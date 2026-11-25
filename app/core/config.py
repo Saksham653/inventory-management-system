@@ -74,7 +74,7 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """Render and Heroku hand out postgres:// URLs; SQLAlchemy async needs the driver named."""
+        """Hosts hand out postgres:// URLs; SQLAlchemy async needs the driver named."""
         url = self.DATABASE_URL
         if url.startswith("postgres://"):
             url = "postgresql+asyncpg://" + url[len("postgres://"):]
