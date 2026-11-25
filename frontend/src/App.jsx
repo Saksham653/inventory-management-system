@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { lazy, Suspense, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { AuthProvider, useAuth } from "./lib/auth"
 import { ToastProvider } from "./lib/motion"
@@ -18,6 +18,8 @@ import Team from "./pages/Team"
 import Import from "./pages/Import"
 import Assistant from "./pages/Assistant"
 import WhatsApp from "./pages/WhatsApp"
+
+const Landing = lazy(() => import("./pages/Landing"))
 
 // Pages are addressed by the URL hash (#products) so they can be bookmarked and survive reloads.
 function readHash() {
@@ -66,12 +68,29 @@ function Workspace() {
   return <Shell page={allowed ? page : "today"} setPage={setPage} openProduct={openLedger}>{view}</Shell>
 }
 
+// Signed-out visitors see the landing page; people who have signed in on this device before,
+// or who open #login, go straight to the sign-in screen. #home always shows the landing page.
+function publicView() {
+  const h = window.location.hash.slice(1)
+  if (h === "login" || h === "home") return h
+  try { if (localStorage.getItem("sw:returning")) return "login" } catch { /* storage blocked */ }
+  return "home"
+}
+
 function Gate() {
   const { user, checking } = useAuth()
+  const [, rerender] = useState(0)
+  useEffect(() => {
+    const onHash = () => rerender(n => n + 1)
+    window.addEventListener("hashchange", onHash)
+    return () => window.removeEventListener("hashchange", onHash)
+  }, [])
   if (checking) {
     return <><Ambient /><div style={{ height: "100%", display: "grid", placeItems: "center", position: "relative" }}><Loader2 className="spin faint" /></div></>
   }
-  return user ? <Workspace /> : <Login />
+  if (user) return <Workspace />
+  if (publicView() === "login") return <Login />
+  return <Suspense fallback={<div style={{ minHeight: "100%", background: "var(--bg)" }} />}><Landing /></Suspense>
 }
 
 export default function App() {
