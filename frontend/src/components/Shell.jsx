@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
   BookOpenText, Boxes, Bot, ClipboardList, FolderTree, LayoutDashboard, LogOut, Menu, PanelLeftClose,
-  PanelLeftOpen, Radar, ScanLine, Search, ShoppingCart, Sun, Truck, Upload, Users,
+  MessageCircle, PanelLeftOpen, Radar, ScanLine, Search, ShoppingCart, Sun, Truck, Upload, Users,
 } from "lucide-react"
 import { useAuth } from "../lib/auth"
 import { initials } from "../lib/format"
@@ -24,6 +24,7 @@ export const PAGES = [
   { id: "team", label: "Team", icon: Users, group: "Setup", needs: "manage" },
   { id: "import", label: "Import data", icon: Upload, group: "Setup", needs: "manage" },
   { id: "assistant", label: "Assistant", icon: Bot, group: "Tools" },
+  { id: "whatsapp", label: "WhatsApp brief", icon: MessageCircle, group: "Tools", needs: "manage" },
 ]
 
 export function Ambient() {

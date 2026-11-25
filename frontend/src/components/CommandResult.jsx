@@ -18,7 +18,7 @@ const KIND = {
   clarify: { icon: HelpCircle, label: "Which one?" },
   unsupported: { icon: Bot, label: "Try this" },
 }
-const STATUS = { proposed: ["Needs your OK", "warn"], done: ["Done", "ok"], undone: ["Undone", ""], answered: ["", ""], expired: ["Expired", "crit"], failed: ["Failed", "crit"] }
+const STATUS = { proposed: ["Needs your OK", "warn"], done: ["Done", "ok"], undone: ["Undone", ""], answered: ["", ""], expired: ["Expired", "crit"], failed: ["Failed", "crit"], cancelled: ["Cancelled", ""] }
 
 const changed = () => window.dispatchEvent(new Event("sw:data-changed"))
 

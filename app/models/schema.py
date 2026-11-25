@@ -1,6 +1,6 @@
 from datetime import timezone
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import TypeDecorator
@@ -42,6 +42,8 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False, default="staff")
     is_active = Column(Boolean, nullable=False, default=True)
+    phone = Column(String, index=True)       # WhatsApp number, digits with country code (919876543210)
+    whatsapp_brief = Column(Boolean, default=False)  # gets the daily brief
     created_at = Column(UTCDateTime, server_default=func.now())
 
 
@@ -250,7 +252,7 @@ class ProductAlias(Base):
 
 
 # ---------------- Command bar ----------------
-ACTION_STATUSES = ("proposed", "done", "undone", "answered", "failed", "expired")
+ACTION_STATUSES = ("proposed", "done", "undone", "answered", "failed", "expired", "cancelled")
 
 
 class AssistantAction(Base):
@@ -269,6 +271,51 @@ class AssistantAction(Base):
     result = Column(String)           # JSON: ids needed to undo
     status = Column(String, nullable=False, default="proposed")
     error = Column(String)
+    channel = Column(String, default="app")   # "app" or "whatsapp"
     created_at = Column(UTCDateTime, server_default=func.now())
     executed_at = Column(UTCDateTime)
     undone_at = Column(UTCDateTime)
+
+
+# ---------------- WhatsApp brief ----------------
+
+class AppSetting(Base):
+    """Small key/value settings the owner changes in the app (brief time, language...). Values are JSON."""
+    __tablename__ = "app_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String)
+
+
+class WhatsAppMessage(Base):
+    """Every WhatsApp message sent or received. Kept even in preview mode, where nothing leaves the app."""
+    __tablename__ = "whatsapp_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    phone = Column(String, index=True)
+    direction = Column(String, nullable=False)   # "out" (we sent) or "in" (they sent)
+    kind = Column(String, nullable=False)        # brief, template, reply, text, button
+    body = Column(String)
+    buttons = Column(String)                     # JSON: [{"id", "title"}]
+    status = Column(String, nullable=False)      # preview, sent, delivered, read, failed, received
+    simulated = Column(Boolean, default=False)   # sent from the in-app phone preview
+    wa_id = Column(String, index=True)           # Meta's message id
+    error = Column(String)
+    action_id = Column(Integer, ForeignKey("assistant_actions.id"))
+    brief_id = Column(Integer, ForeignKey("whatsapp_briefs.id"))
+    created_at = Column(UTCDateTime, server_default=func.now(), index=True)
+
+
+class WhatsAppBrief(Base):
+    """One daily brief for one person. The unique (user, date) pair stops two workers sending it twice.
+    Briefs sent by hand have no date. `snapshot` holds the reorder lines shown, so a tap on
+    "Approve order" only runs straight away if the numbers are still the same."""
+    __tablename__ = "whatsapp_briefs"
+    __table_args__ = (UniqueConstraint("user_id", "brief_date", name="uq_brief_user_date"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    brief_date = Column(Date)
+    snapshot = Column(String)
+    created_at = Column(UTCDateTime, server_default=func.now())

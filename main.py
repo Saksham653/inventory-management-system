@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +9,13 @@ import logging, time, os
 from pathlib import Path
 
 from app.core.config import settings
-from app.core.database import engine
+from app.core.database import AsyncSessionLocal, engine
 from app.core.migrate import upgrade_schema, backfill_ledger, startup_lock
 from app.core.seed import seed_data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders, bills, assistant
+from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders, bills, assistant, whatsapp
+from app.services.whatsapp import scheduler_loop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -29,7 +31,11 @@ async def lifespan(app: FastAPI):
             await seed_data(db)
             await backfill_ledger(db)
 
+    # The WhatsApp morning brief. Every worker runs it; a unique row per person per day means one send.
+    brief_task = asyncio.create_task(scheduler_loop(AsyncSessionLocal)) if settings.WHATSAPP_SCHEDULER else None
     yield
+    if brief_task:
+        brief_task.cancel()
 
 app = FastAPI(
     title="StockWaves API",
@@ -91,6 +97,7 @@ app.include_router(radar.router,      prefix="/api/v1/radar",      tags=["Paisa 
 app.include_router(purchase_orders.router, prefix="/api/v1/purchase-orders", tags=["Purchase orders"])
 app.include_router(bills.router,      prefix="/api/v1/bills",      tags=["Snap-a-Bill"])
 app.include_router(assistant.router,  prefix="/api/v1/assistant",  tags=["Command bar"])
+app.include_router(whatsapp.router,   prefix="/api/v1/whatsapp",   tags=["WhatsApp brief"])
 app.include_router(dashboard.router,  prefix="/api/v1/dashboard",  tags=["Dashboard"])
 app.include_router(chatbot.router,    prefix="/api/v1/chatbot",    tags=["AI Assistant"])
 app.include_router(uploader.router,   prefix="/api/v1/uploader",   tags=["Data Uploader"])
