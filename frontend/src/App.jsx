@@ -17,6 +17,7 @@ import Suppliers from "./pages/Suppliers"
 import Team from "./pages/Team"
 import Import from "./pages/Import"
 import Assistant from "./pages/Assistant"
+import WhatsApp from "./pages/WhatsApp"
 
 // Pages are addressed by the URL hash (#products) so they can be bookmarked and survive reloads.
 function readHash() {
@@ -59,6 +60,7 @@ function Workspace() {
     team: <Team />,
     import: <Import />,
     assistant: <Assistant setPage={setPage} openLedger={openLedger} />,
+    whatsapp: <WhatsApp />,
   }[page]
 
   return <Shell page={allowed ? page : "today"} setPage={setPage} openProduct={openLedger}>{view}</Shell>
