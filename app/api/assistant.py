@@ -37,8 +37,16 @@ async def execute(action_id: int, user: User = ANY_USER, db: AsyncSession = Depe
     try:
         return await commands.execute(db, user, action_id)
     except commands.CommandError as e:
-        if e.status == 400 and "15 minutes" in str(e):
+        if e.code == "expired":
             await db.commit()  # keep the "expired" status
+        raise _wrap(e)
+
+
+@router.post("/actions/{action_id}/cancel")
+async def cancel(action_id: int, user: User = ANY_USER, db: AsyncSession = Depends(get_db)):
+    try:
+        return await commands.cancel(db, user, action_id)
+    except commands.CommandError as e:
         raise _wrap(e)
 
 
