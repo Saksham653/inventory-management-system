@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     BILL_AI_MODEL: str = ""        # empty = provider default (claude-opus-5-5 / qwen/qwen3.8-27b)
     BILL_AI_EFFORT: str = "low"    # Claude effort; low keeps a scan to a few seconds
 
+    # Command bar: free-form commands and questions (simple commands work without a key).
+    ASSISTANT_PROVIDER: str = ""   # "anthropic", "groq", or empty for whichever key is set
+    ASSISTANT_MODEL: str = ""      # empty = claude-opus-5-5 / qwen/qwen3.8-27b
+    ASSISTANT_EFFORT: str = "low"
+
     # App
     FRONTEND_URL: str = "http://localhost:5173"
     ENVIRONMENT: str = "development"

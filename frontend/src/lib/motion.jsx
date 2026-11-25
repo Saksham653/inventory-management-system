@@ -57,17 +57,25 @@ const ToastContext = createContext(() => {})
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
-  const push = useCallback(text => {
+  // push(text) or push(text, { action: { label, onClick } }); toasts with an action stay longer.
+  const push = useCallback((text, opts = {}) => {
     const id = Math.random().toString(36).slice(2)
-    setToasts(t => [...t, { id, text }])
-    setTimeout(() => setToasts(t => t.map(x => (x.id === id ? { ...x, out: true } : x))), 3200)
-    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
+    const ms = opts.action ? 7000 : 3200
+    setToasts(t => [...t, { id, text, action: opts.action }])
+    setTimeout(() => setToasts(t => t.map(x => (x.id === id ? { ...x, out: true } : x))), ms)
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), ms + 300)
   }, [])
+  const dismiss = id => setToasts(t => t.filter(x => x.id !== id))
   return (
     <ToastContext.Provider value={push}>
       {children}
       <div className="toasts" aria-live="polite">
-        {toasts.map(t => <div key={t.id} className={`toast ${t.out ? "out" : ""}`}><CheckCircle2 size={18} />{t.text}</div>)}
+        {toasts.map(t => (
+          <div key={t.id} className={`toast ${t.out ? "out" : ""}`}>
+            <CheckCircle2 size={18} /><span style={{ flex: 1 }}>{t.text}</span>
+            {t.action && <button className="toast-action" onClick={() => { dismiss(t.id); t.action.onClick() }}>{t.action.label}</button>}
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   )
