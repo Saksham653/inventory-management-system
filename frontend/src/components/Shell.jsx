@@ -107,6 +107,10 @@ export default function Shell({ page, setPage, openProduct, children }) {
             </button>
             <span className="crumb"><span className="faint desktop-only">StockWaves /</span>{current?.label}</span>
             <span className="spacer" />
+            <button className="top-cmd desktop-only" onClick={() => setCmdk(true)}>
+              <Search size={15} /><span>Ask or do anything…</span><kbd>Ctrl K</kbd>
+            </button>
+            <span className="spacer" />
             <span className="desktop-only faint" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
               <span className="live-dot" /> Live · {new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
             </span>

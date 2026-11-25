@@ -13,7 +13,7 @@ from app.core.migrate import upgrade_schema, backfill_ledger, startup_lock
 from app.core.seed import seed_data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders, bills
+from app.api import auth, employees, suppliers, products, categories, sales, chatbot, dashboard, uploader, stock, radar, purchase_orders, bills, assistant
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -90,6 +90,7 @@ app.include_router(stock.router,      prefix="/api/v1/stock",      tags=["Stock 
 app.include_router(radar.router,      prefix="/api/v1/radar",      tags=["Paisa Radar"])
 app.include_router(purchase_orders.router, prefix="/api/v1/purchase-orders", tags=["Purchase orders"])
 app.include_router(bills.router,      prefix="/api/v1/bills",      tags=["Snap-a-Bill"])
+app.include_router(assistant.router,  prefix="/api/v1/assistant",  tags=["Command bar"])
 app.include_router(dashboard.router,  prefix="/api/v1/dashboard",  tags=["Dashboard"])
 app.include_router(chatbot.router,    prefix="/api/v1/chatbot",    tags=["AI Assistant"])
 app.include_router(uploader.router,   prefix="/api/v1/uploader",   tags=["Data Uploader"])

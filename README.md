@@ -51,6 +51,14 @@ Inventory counted in rupees. Every morning the home screen answers three questio
 - **What should I do today?** Ranked actions by rupees at stake: reorder, bundle with a fast seller, a discount that stays above cost, return extra stock to the supplier.
 - **How is this calculated?** Every figure opens the formula with your real numbers, and links to the ledger rows behind it.
 
+### ⌨️ Command bar (Ctrl K)
+- Type what you want done: "reorder iPhones", "order 10 Galaxy S24 from Samsung", "add 20 USB-C Hub at 2200", "sold 2 Galaxy S24", "set price of iPad Air 5 to 61900", "set stock of Vivo V12 to 18" — plus Hinglish like "12 iPhone aaye" or "10 USB-C hub mangao"
+- Every action shows a preview of exactly what will change; nothing happens until you confirm
+- Done actions show an **Undo** (purchase orders are cancelled, stock and prices restored through the ledger)
+- Questions like "what's running low?" or "what didn't sell this month?" are answered from Paisa Radar
+- Everyday commands work without any AI key; with `GROQ_API_KEY` or `ANTHROPIC_API_KEY` it also understands free-form wording and questions
+- The Assistant page keeps an action log: every command, what it changed, and who ran it
+
 ### 📸 Snap-a-Bill (Stock in)
 - Photograph or upload a supplier bill, printed or handwritten; a vision model reads every item line, quantity and rate
 - Each line is matched to your products (handles abbreviations, typos and SKUs), or pre-filled as a new product
@@ -159,6 +167,9 @@ stockwaves/
 │   │   ├── radar.py          # Paisa Radar calculations
 │   │   ├── bill_reader.py    # Reads bill photos with Claude or Groq
 │   │   ├── matching.py       # Matches bill lines to products, learns aliases
+│   │   ├── commands.py       # Command bar: rules + AI, preview, execute, undo
+│   │   ├── llm.py            # Claude / Groq helper for the command bar
+│   │   ├── sales.py          # Recording and voiding sales
 │   │   └── insights.py       # Days of cover & reorder risk
 │   └── models/
 │       └── schema.py         # ORM models
@@ -269,6 +280,10 @@ All endpoints require `Authorization: Bearer <token>` except login and register.
 | `GET` | `/api/v1/dashboard/stats` | Any | KPIs & analytics |
 | `GET` | `/api/v1/radar/` | Any | Paisa Radar: stuck cash, reorder list, ranked actions |
 | `GET` | `/api/v1/purchase-orders/` | Any | Purchase orders |
+| `POST` | `/api/v1/assistant/plan` | Any | Understand a command and return a preview |
+| `POST` | `/api/v1/assistant/actions/{id}/execute` | Any* | Run a previewed command (*stock, order and price actions need Admin/Manager) |
+| `POST` | `/api/v1/assistant/actions/{id}/undo` | Any* | Undo a command |
+| `GET` | `/api/v1/assistant/actions` | Any | Action log (staff see their own) |
 | `POST` | `/api/v1/bills/scan` | Admin/Manager | Read a bill photo into a draft with matched lines |
 | `PATCH` | `/api/v1/bills/{id}` | Admin/Manager | Edit a draft bill's supplier, matches, quantities and costs |
 | `POST` | `/api/v1/bills/{id}/post` | Admin/Manager | Add the bill to stock through the ledger |

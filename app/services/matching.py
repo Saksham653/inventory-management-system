@@ -62,6 +62,15 @@ def score(raw: str, name: str, sku: str | None = None) -> float:
     return round(min(s, 1.0), 3)
 
 
+def query_coverage(query: str, name: str, sku: str | None = None) -> float:
+    """Share of the typed words found in this product's name or SKU. "iPhones" fully covers "iPhone 15 Pro"."""
+    qt = tokens(query)
+    pt = tokens(name) + tokens(sku or "")
+    if not qt or not pt:
+        return 0.0
+    return sum(1 for q in qt if any(_token_match(q, p) for p in pt)) / len(qt)
+
+
 def rank(raw: str, products: list, aliases: dict[str, int] | None = None, limit: int = 3) -> list[dict]:
     """Best product candidates for one bill line: [{product_id, name, score, via}]."""
     key = normalise(raw)
@@ -84,6 +93,8 @@ def best_supplier(raw_name: str | None, suppliers: list):
     best, best_s = None, 0.0
     for s in suppliers:
         sc = score(raw_name, s.name)
+        if query_coverage(raw_name, s.name) == 1.0:
+            sc = max(sc, 0.8)  # "apple" fully names "Apple Pvt Ltd"
         if sc > best_s:
             best, best_s = s, sc
     return (best, best_s) if best_s >= CHECK else (None, best_s)
