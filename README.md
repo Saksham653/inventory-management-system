@@ -59,6 +59,13 @@ Inventory counted in rupees. Every morning the home screen answers three questio
 - Everyday commands work without any AI key; with `GROQ_API_KEY` or `ANTHROPIC_API_KEY` it also understands free-form wording and questions
 - The Assistant page keeps an action log: every command, what it changed, and who ran it
 
+### 💬 WhatsApp brief
+- Every morning (default 9:00 am IST) each person who opts in gets Paisa Radar on WhatsApp: stock value, what runs out before the next delivery, what's stuck, a ready reorder list and yesterday's sales. English or Hinglish
+- **Approve order** drafts the purchase orders in one tap. If the numbers changed since the brief, it shows the new order with Confirm instead of running it
+- Reply with any command ("sold 2 Galaxy S24", "20 USB-C Hub aaye", "what's running low?"): the same preview, Confirm, Undo and action log as the command bar. Also `yes` / `no`, `undo`, `brief`, `help`, `stop` / `start`
+- **Preview mode** without a Meta account: the WhatsApp brief page has a phone that behaves exactly like WhatsApp, so the whole flow can be tried before connecting a number
+- Incoming webhooks are checked against the Meta app secret; numbers that aren't linked to a user get one polite reply a day and nothing else
+
 ### 📸 Snap-a-Bill (Stock in)
 - Photograph or upload a supplier bill, printed or handwritten; a vision model reads every item line, quantity and rate
 - Each line is matched to your products (handles abbreviations, typos and SKUs), or pre-filled as a new product
@@ -154,6 +161,7 @@ stockwaves/
 │   │   ├── stock.py          # Stock ledger & adjustments
 │   │   ├── dashboard.py      # Analytics & KPIs
 │   │   ├── chatbot.py        # AI assistant (Groq)
+│   │   ├── whatsapp.py       # WhatsApp settings, phone preview, Meta webhook
 │   │   └── uploader.py       # Excel/CSV bulk import
 │   ├── core/
 │   │   ├── config.py         # Environment settings (Pydantic)
@@ -169,6 +177,7 @@ stockwaves/
 │   │   ├── matching.py       # Matches bill lines to products, learns aliases
 │   │   ├── commands.py       # Command bar: rules + AI, preview, execute, undo
 │   │   ├── llm.py            # Claude / Groq helper for the command bar
+│   │   ├── whatsapp.py       # Morning brief, replies, sending, daily schedule
 │   │   ├── sales.py          # Recording and voiding sales
 │   │   └── insights.py       # Days of cover & reorder risk
 │   └── models/
@@ -265,6 +274,38 @@ Health check: `GET /api/v1/health` returns `{"status": "ok"}` when the API can r
 1. In `netlify.toml`, point the `/api/*` redirect at your Railway domain.
 2. Import the repo in Netlify. The build settings come from `netlify.toml` (base `frontend`, command `npm run build`, publish `dist`).
 
+**3. WhatsApp brief (optional)**
+
+Until these are set, the WhatsApp brief page runs in preview mode: nothing leaves the app.
+
+1. On [developers.facebook.com](https://developers.facebook.com), create an app, add the **WhatsApp** product and a business number. The free test number can message up to 5 phones you add under API Setup.
+2. Add these variables on Railway (stockwaves → api → Variables):
+
+| Variable | Description |
+|----------|-------------|
+| `WHATSAPP_TOKEN` | Permanent access token of a system user with `whatsapp_business_messaging` permission |
+| `WHATSAPP_PHONE_NUMBER_ID` | The sending number's id from WhatsApp → API Setup (not the phone number) |
+| `WHATSAPP_APP_SECRET` | App settings → Basic → App secret. Webhooks without a valid signature are rejected |
+| `WHATSAPP_VERIFY_TOKEN` | Any phrase you choose; enter the same one in Meta's webhook setup |
+| `WHATSAPP_BRIEF_TEMPLATE` | Optional: name of the approved template below |
+| `WHATSAPP_TEMPLATE_LANG` | Template language code, default `en` |
+| `WHATSAPP_GRAPH_VERSION` | Graph API version, default `v26.0` |
+
+3. In Meta → WhatsApp → Configuration, set the callback URL to `https://<your-railway-domain>/api/v1/whatsapp/webhook` (the WhatsApp brief page shows it with a copy button), enter the verify token, and subscribe to `messages`.
+4. Turn the brief on and add numbers on the WhatsApp brief page. Each person sends "hi" to the shop number once.
+
+WhatsApp lets a business send free-form messages only within 24 hours of the person's last message. For other mornings, create a **Utility** template (WhatsApp Manager → Message templates), named e.g. `daily_brief`, with this body and two quick-reply buttons, **Show brief** and **Approve order**:
+
+```
+Good morning. Your StockWaves brief for {{1}}:
+Stock at cost: {{2}}
+Running out: {{3}}
+Stuck 60+ days: {{4}}
+Tap below to see the full brief or approve the reorder.
+```
+
+Without the template, a brief that falls outside the 24-hour window is marked as failed on the page, with the reason.
+
 ---
 
 ## 📡 API Reference
@@ -284,6 +325,12 @@ All endpoints require `Authorization: Bearer <token>` except login and register.
 | `POST` | `/api/v1/assistant/actions/{id}/execute` | Any* | Run a previewed command (*stock, order and price actions need Admin/Manager) |
 | `POST` | `/api/v1/assistant/actions/{id}/undo` | Any* | Undo a command |
 | `GET` | `/api/v1/assistant/actions` | Any | Action log (staff see their own) |
+| `GET` | `/api/v1/whatsapp/status` | Admin/Manager | WhatsApp mode, brief settings, recipients, webhook URL |
+| `PUT` | `/api/v1/whatsapp/settings` | Admin | Brief on/off, time, days, language |
+| `PUT` | `/api/v1/whatsapp/recipients/{user_id}` | Admin (or self) | WhatsApp number and brief opt-in |
+| `POST` | `/api/v1/whatsapp/simulate` | Admin/Manager | Message or button tap from the in-app phone preview |
+| `POST` | `/api/v1/whatsapp/brief/send` | Admin/Manager | Send today's brief now (preview or real) |
+| `GET/POST` | `/api/v1/whatsapp/webhook` | Meta (signed) | Webhook verification and incoming messages |
 | `POST` | `/api/v1/bills/scan` | Admin/Manager | Read a bill photo into a draft with matched lines |
 | `PATCH` | `/api/v1/bills/{id}` | Admin/Manager | Edit a draft bill's supplier, matches, quantities and costs |
 | `POST` | `/api/v1/bills/{id}/post` | Admin/Manager | Add the bill to stock through the ledger |

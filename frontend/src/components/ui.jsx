@@ -53,6 +53,13 @@ export function Segmented({ options, value, onChange }) {
   )
 }
 
+export function Switch({ checked, onChange, disabled, label }) {
+  return (
+    <button type="button" role="switch" aria-checked={!!checked} aria-label={label} disabled={disabled}
+      className={`switch ${checked ? "on" : ""}`} onClick={() => onChange?.(!checked)}><span /></button>
+  )
+}
+
 export function Pill({ tone, dot, children }) {
   return <span className={`pill ${tone || ""}`}>{dot && <span className="dot" />}{children}</span>
 }

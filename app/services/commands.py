@@ -30,7 +30,7 @@ PROPOSAL_TTL = timedelta(minutes=15)
 PAGES = {
     "today": "Today", "products": "Products", "sales": "Sales", "stockin": "Stock in", "ledger": "Stock ledger",
     "radar": "Paisa Radar", "orders": "Purchase orders", "dashboard": "Analytics", "categories": "Categories",
-    "suppliers": "Suppliers", "team": "Team", "import": "Import data", "assistant": "Assistant",
+    "suppliers": "Suppliers", "team": "Team", "import": "Import data", "assistant": "Assistant", "whatsapp": "WhatsApp brief",
 }
 EXAMPLES = [
     "reorder everything running low", "reorder iPhone 15 Pro", "order 10 Galaxy S24 from Samsung",
@@ -40,9 +40,10 @@ EXAMPLES = [
 
 
 class CommandError(Exception):
-    def __init__(self, message: str, status: int = 400):
+    def __init__(self, message: str, status: int = 400, code: str = ""):
         super().__init__(message)
         self.status = status
+        self.code = code  # "expired" when a preview is too old to run
 
 
 # ------------------------------------------------------------------ formatting
@@ -489,7 +490,7 @@ def _role_ok(user: User, kind: str) -> bool:
     return kind not in MANAGE_KINDS or user.role in ("admin", "manager")
 
 
-async def plan(db: AsyncSession, user: User, text: str) -> dict:
+async def plan(db: AsyncSession, user: User, text: str, channel: str = "app") -> dict:
     text = (text or "").strip()
     if not text:
         raise CommandError("Type a command, like “reorder iPhone 15 Pro”.")
@@ -502,7 +503,7 @@ async def plan(db: AsyncSession, user: User, text: str) -> dict:
         direct = await answer_from_data(db, intent["question"])
         if direct:
             preview = {"kind": "answer", "title": "Answer", **direct}
-            return await _save(db, user, text, preview, reader, status="answered")
+            return await _save(db, user, text, preview, reader, status="answered", channel=channel)
     if not intent or intent["kind"] == "answer":
         if llm.provider():
             try:
@@ -514,14 +515,14 @@ async def plan(db: AsyncSession, user: User, text: str) -> dict:
             msg = ai_error or ("I can do everyday stock actions without AI. For free-form questions, add an AI key on the server."
                                if not llm.provider() else "I didn't understand that.")
             preview = {"kind": "unsupported", "title": "Try one of these", "summary": msg, "suggestions": EXAMPLES[:6]}
-            return await _save(db, user, text, preview, reader, status="answered")
+            return await _save(db, user, text, preview, reader, status="answered", channel=channel)
 
     kind = intent["kind"]
     if kind in ("answer", "unsupported"):
         preview = {"kind": kind, "title": "Answer" if kind == "answer" else "Not something I can do",
                    "answer": intent.get("answer") or "I don't have an answer for that.", "rows": [],
                    "suggestions": [] if kind == "answer" else EXAMPLES[:4]}
-        return await _save(db, user, text, preview, reader, status="answered")
+        return await _save(db, user, text, preview, reader, status="answered", channel=channel)
 
     builder = {"draft_purchase_order": plan_purchase, "adjust_stock": plan_adjust, "record_sale": plan_sale,
                "update_price": plan_price, "navigate": plan_navigate}[kind]
@@ -529,14 +530,15 @@ async def plan(db: AsyncSession, user: User, text: str) -> dict:
     if preview["kind"] in EXECUTABLE and not _role_ok(user, preview["kind"]):
         preview["blocking"] = "Only managers and admins can do this."
     status = "proposed" if preview["kind"] in EXECUTABLE and "params" in preview and not preview.get("blocking") else "answered"
-    return await _save(db, user, text, preview, reader, status=status)
+    return await _save(db, user, text, preview, reader, status=status, channel=channel)
 
 
-async def _save(db: AsyncSession, user: User, text: str, preview: dict, reader: str, status: str) -> dict:
+async def _save(db: AsyncSession, user: User, text: str, preview: dict, reader: str, status: str,
+                channel: str = "app") -> dict:
     params = preview.pop("params", None)
     action = AssistantAction(user_id=user.id, user_name=user.name, command=text, kind=preview["kind"], interpreted_by=reader,
                              plan=json.dumps(params) if params is not None else None, preview=json.dumps(preview, default=str),
-                             status=status)
+                             status=status, channel=channel)
     db.add(action)
     await db.flush()
     return action_out(action)
@@ -548,7 +550,7 @@ def action_out(a: AssistantAction) -> dict:
     return {
         "id": a.id, "command": a.command, "kind": a.kind, "status": a.status, "interpreted_by": a.interpreted_by,
         "user_name": a.user_name, "created_at": a.created_at, "executed_at": a.executed_at, "undone_at": a.undone_at,
-        "error": a.error, "preview": preview, "result": result,
+        "error": a.error, "preview": preview, "result": result, "channel": a.channel or "app",
         "can_execute": a.status == "proposed", "can_undo": a.status == "done" and a.kind in EXECUTABLE,
     }
 
@@ -572,7 +574,7 @@ async def execute(db: AsyncSession, user: User, action_id: int) -> dict:
         raise CommandError(f"This command is already {a.status}.")
     if datetime.now(timezone.utc) - _aware(a.created_at) > PROPOSAL_TTL:
         a.status = "expired"
-        raise CommandError("This preview is more than 15 minutes old. Run the command again to get fresh numbers.")
+        raise CommandError("This preview is more than 15 minutes old. Run the command again to get fresh numbers.", code="expired")
     if not _role_ok(user, a.kind):
         raise CommandError("Only managers and admins can do this.", 403)
     p = json.loads(a.plan)
@@ -655,6 +657,16 @@ async def undo(db: AsyncSession, user: User, action_id: int) -> dict:
             raise CommandError("The price was changed again since, so this can't be undone safely.", 409)
         setattr(product, r["field"], r["old"])
     a.status, a.undone_at = "undone", datetime.now(timezone.utc)
+    await db.flush()
+    return action_out(a)
+
+
+async def cancel(db: AsyncSession, user: User, action_id: int) -> dict:
+    """Drop a preview the person decided against. Nothing had changed, so nothing to reverse."""
+    a = await _get(db, action_id, user)
+    if a.status != "proposed":
+        raise CommandError(f"This command is already {a.status}.")
+    a.status = "cancelled"
     await db.flush()
     return action_out(a)
 

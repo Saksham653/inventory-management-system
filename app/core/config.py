@@ -48,6 +48,21 @@ class Settings(BaseSettings):
     ASSISTANT_MODEL: str = ""      # empty = claude-opus-5-5 / qwen/qwen3.8-27b
     ASSISTANT_EFFORT: str = "low"
 
+    # WhatsApp brief (Meta WhatsApp Cloud API). Without a token and phone number id, messages
+    # are kept in the app's preview instead of being sent, so everything can be tried first.
+    WHATSAPP_TOKEN: str = ""             # permanent access token of a Meta system user
+    WHATSAPP_PHONE_NUMBER_ID: str = ""   # the sending number's id (not the number itself)
+    WHATSAPP_APP_SECRET: str = ""        # Meta app secret; incoming webhooks are rejected without it
+    WHATSAPP_VERIFY_TOKEN: str = ""      # any value you choose; enter the same one in Meta's webhook setup
+    WHATSAPP_GRAPH_VERSION: str = "v26.0"
+    # Approved template used when the person hasn't messaged in 24 hours (WhatsApp's rule
+    # for business-started chats). See the README for its exact text.
+    WHATSAPP_BRIEF_TEMPLATE: str = ""
+    WHATSAPP_TEMPLATE_LANG: str = "en"
+    WHATSAPP_SCHEDULER: bool = True      # send the daily brief from the API process
+    PUBLIC_API_URL: str = ""             # e.g. https://api.example.com; Railway's domain is used if empty
+    RAILWAY_PUBLIC_DOMAIN: str = ""
+
     # App
     FRONTEND_URL: str = "http://localhost:5173"
     ENVIRONMENT: str = "development"

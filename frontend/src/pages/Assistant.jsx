@@ -10,8 +10,8 @@ const KIND_LABEL = {
   answer: "Answer", navigate: "Open", clarify: "Which one?", unsupported: "Not understood",
 }
 const ACTIONS = new Set(["draft_purchase_order", "adjust_stock", "record_sale", "update_price"])
-const STATUS_TONE = { done: "ok", proposed: "warn", undone: "", answered: "info", expired: "crit", failed: "crit" }
-const STATUS_LABEL = { done: "Done", proposed: "Not confirmed", undone: "Undone", answered: "Answered", expired: "Expired", failed: "Failed" }
+const STATUS_TONE = { done: "ok", proposed: "warn", undone: "", answered: "info", expired: "crit", failed: "crit", cancelled: "" }
+const STATUS_LABEL = { done: "Done", proposed: "Not confirmed", undone: "Undone", answered: "Answered", expired: "Expired", failed: "Failed", cancelled: "Cancelled" }
 
 export default function Assistant({ setPage, openLedger }) {
   const info = useApi("/assistant/info", { ai: false, examples: [] })
@@ -41,14 +41,14 @@ export default function Assistant({ setPage, openLedger }) {
       const blocked = a.status === "answered" && ACTIONS.has(a.kind)
       return <Pill tone={blocked ? "crit" : STATUS_TONE[a.status]} dot>{blocked ? "Blocked" : STATUS_LABEL[a.status] || a.status}</Pill>
     } },
-    { key: "user_name", label: "By", render: a => <span className="muted">{a.user_name}</span> },
+    { key: "user_name", label: "By", render: a => <span className="muted">{a.user_name}{a.channel === "whatsapp" && <span className="faint"> · WhatsApp</span>}</span> },
     { key: "created_at", label: "When", render: a => <span className="muted">{dateTime(a.executed_at || a.created_at)}</span> },
     { key: "undo", label: "", render: a => a.can_undo ? <button className="btn sm ghost" onClick={() => undoRow(a)}><RotateCcw size={13} />Undo</button> : null },
   ]
 
   return (
     <>
-      <PageHead title="Assistant" sub="Type what you want done. You'll see exactly what will change, and nothing happens until you confirm. Press Ctrl K anywhere for the same thing." />
+      <PageHead title="Assistant" sub="Type what you want done. You'll see exactly what will change, and nothing happens until you confirm. Press Ctrl K anywhere, or send the same commands on WhatsApp." />
       {!info.data.ai && (
         <Alert type="info">Everyday commands work now. To also ask free-form questions or use your own wording, add <b>GROQ_API_KEY</b> or <b>ANTHROPIC_API_KEY</b> on the server.</Alert>
       )}
