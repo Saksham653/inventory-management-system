@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
   BookOpenText, Boxes, Bot, ClipboardList, FolderTree, LayoutDashboard, LogOut, Menu, PanelLeftClose,
-  PanelLeftOpen, Radar, Search, ShoppingCart, Sun, Truck, Upload, Users,
+  PanelLeftOpen, Radar, ScanLine, Search, ShoppingCart, Sun, Truck, Upload, Users,
 } from "lucide-react"
 import { useAuth } from "../lib/auth"
 import { initials } from "../lib/format"
@@ -14,6 +14,7 @@ export const PAGES = [
   { id: "today", label: "Today", icon: Sun, group: "Shop" },
   { id: "products", label: "Products", icon: Boxes, group: "Shop" },
   { id: "sales", label: "Sales", icon: ShoppingCart, group: "Shop" },
+  { id: "stockin", label: "Stock in", icon: ScanLine, group: "Shop", needs: "manage" },
   { id: "ledger", label: "Stock ledger", icon: BookOpenText, group: "Shop" },
   { id: "radar", label: "Paisa Radar", icon: Radar, group: "Money" },
   { id: "orders", label: "Purchase orders", icon: ClipboardList, group: "Money" },

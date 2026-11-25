@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     XAI_API_KEY: str = ""
     GROQ_API_KEY: str = ""
 
+    # Snap-a-Bill (reading supplier bills from photos).
+    # BILL_AI_PROVIDER: "anthropic", "groq", or empty to use whichever key is set (Anthropic first).
+    # "demo" returns a fixed sample reading for local UI testing only; never use it in production.
+    BILL_AI_PROVIDER: str = ""
+    BILL_AI_MODEL: str = ""        # empty = provider default (claude-opus-5-5 / qwen/qwen3.8-27b)
+    BILL_AI_EFFORT: str = "low"    # Claude effort; low keeps a scan to a few seconds
+
     # App
     FRONTEND_URL: str = "http://localhost:5173"
     ENVIRONMENT: str = "development"
