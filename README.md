@@ -4,11 +4,11 @@
 
 # StockWaves
 
-**AI-powered Inventory Management System**
+**Inventory for Indian shops, counted in rupees**
 
-*Real-time stock control · Smart analytics · Built for teams*
+*Paisa Radar · WhatsApp brief · Snap-a-Bill · Commands in English or Hinglish*
 
-[![Landing Page](https://img.shields.io/badge/🌊_Landing_Page-Visit_Now-0f172a?style=for-the-badge)](https://saksham653.github.io/inventory-management-system/)
+[![Landing Page](https://img.shields.io/badge/🌊_Landing_Page-Visit_Now-0f172a?style=for-the-badge)](https://stockwaves.netlify.app/#home)
 [![Live Demo](https://img.shields.io/badge/🚀_Live_App-Open_Now-0066CC?style=for-the-badge)](https://stockwaves.netlify.app)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
@@ -22,11 +22,9 @@
 
 ## 🌊 What is StockWaves?
 
-**StockWaves** is a production-ready, full-stack inventory management platform that gives your team real-time control over products, sales, suppliers, and employees — all in one place. It ships with a built-in **AI assistant** powered by Groq that answers questions about your actual inventory data in plain English.
+**StockWaves** is inventory software for Indian shops that counts stock in rupees, not just pieces. It shows which stock isn't selling, what will run out before the next delivery, and drafts the order. Every morning it sends that as one WhatsApp you can approve with a tap. Supplier bills go into stock from a photo, and the whole app takes plain commands in English or Hinglish.
 
-> 🌊 **Landing Page:** [https://saksham653.github.io/inventory-management-system/](https://saksham653.github.io/inventory-management-system/)
->
-> 🚀 **Live App:** [https://stockwaves.netlify.app](https://stockwaves.netlify.app)
+> 🌊 **Landing page and live demo:** [https://stockwaves.netlify.app](https://stockwaves.netlify.app) (signed-out visitors see the landing page; "Open the demo shop" signs you into the sample shop)
 
 ---
 
