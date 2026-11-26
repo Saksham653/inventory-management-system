@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { Loader2, Search } from "lucide-react"
+import { Loader2, Play, Search } from "lucide-react"
 import { api } from "../lib/api"
 import { useAuth } from "../lib/auth"
 import { LogoMark, Wordmark } from "../components/Brand"
 import { WaText } from "../components/WaText"
 import { CommandResult } from "../components/CommandResult"
 import { Pill, Segmented } from "../components/ui"
+import { useCountUp } from "../lib/motion"
 import "./landing.css"
 
 // Anek Latin is by Ek Type, an Indian foundry. Its narrow widths read like shop signboards and price boards.
@@ -101,6 +102,53 @@ const ROLES = {
   admin: ["Owner", "Everything, including the team and WhatsApp settings"],
   manager: ["Manager", "Stock, purchase orders, prices and supplier bills"],
   staff: ["Staff", "Recording sales and looking up stock"],
+}
+
+const FILM = { src: "/film/stockwaves-film.mp4", poster: "/film/stockwaves-poster.jpg", length: "1:09" }
+const H1 = "Know where your money is stuck before you open the shop."
+
+/** True once the element has scrolled into view (and stays true). */
+function useInView(ref) {
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || seen) return
+    if (!("IntersectionObserver" in window)) { setSeen(true); return }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect() } }, { rootMargin: "0px 0px -18% 0px" })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref, seen])
+  return seen
+}
+
+/** A rupee figure that counts up when its row comes into view. */
+function ShelfAmount({ value, on }) {
+  const v = useCountUp(on ? value : 0, 1300)
+  return <>{inr(Math.round(v))}</>
+}
+
+/** The product film: poster and one play button; the browser's own controls once it plays. */
+function FilmPlayer() {
+  const ref = useRef(null)
+  const [playing, setPlaying] = useState(false)
+  const play = () => {
+    const v = ref.current
+    if (!v) return
+    setPlaying(true)
+    v.play().catch(() => setPlaying(false))
+  }
+  return (
+    <div className={`lp-film-frame ${playing ? "on" : ""}`}>
+      <video ref={ref} src={FILM.src} poster={FILM.poster} preload="none" playsInline controls={playing}
+        onEnded={() => setPlaying(false)} aria-label="StockWaves product film" />
+      {!playing && (
+        <button className="lp-film-play" onClick={play} aria-label={`Play the StockWaves film, ${FILM.length}`}>
+          <span className="lp-film-icon"><Play size={30} fill="currentColor" strokeWidth={0} /></span>
+          <span className="lp-film-label">Play the film<span className="lp-film-len">{FILM.length}</span></span>
+        </button>
+      )}
+    </div>
+  )
 }
 
 function useFont() {
@@ -333,6 +381,8 @@ export default function Landing() {
   const [entering, setEntering] = useState("")
   const [err, setErr] = useState("")
   const [scrolled, setScrolled] = useState(false)
+  const shelfRef = useRef(null)
+  const shelfOn = useInView(shelfRef)
 
   useEffect(() => { api("/auth/demo-accounts").then(setDemo).catch(() => setDemo([])) }, [])
   useEffect(() => {
@@ -364,6 +414,7 @@ export default function Landing() {
         <div className="lp-wrap lp-nav-in">
           <a className="lp-brand" href="#home" aria-label="StockWaves home"><LogoMark size={26} /><Wordmark size={19} /></a>
           <nav className="lp-links" aria-label="Sections">
+            <button onClick={() => scrollTo("film")}>Watch the film</button>
             <button onClick={() => scrollTo("money")}>Paisa Radar</button>
             <button onClick={() => scrollTo("commands")}>Commands</button>
             <button onClick={() => scrollTo("bills")}>Bills</button>
@@ -380,7 +431,9 @@ export default function Landing() {
         <section className="lp-hero">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <h1 className="lp-h1">Know where your money is stuck before you open the shop.</h1>
+              <h1 className="lp-h1" aria-label={H1}>
+                {H1.split(" ").map((w, i) => <span key={i} aria-hidden="true"><span className="lp-w" style={{ "--i": i }}>{w}</span>{" "}</span>)}
+              </h1>
               <p className="lp-lead">
                 StockWaves counts your stock in rupees, not just pieces. Every morning it sends one WhatsApp: what isn't selling,
                 what runs out before the next delivery, and the order to place. Approve it with one tap.
@@ -391,12 +444,23 @@ export default function Landing() {
                       {entering === "admin" && <Loader2 size={16} className="spin" />}Open the demo shop
                     </button>
                   : <button className="btn primary lp-btn" onClick={signIn}>Sign in</button>}
-                <button className="btn lp-btn" onClick={() => scrollTo("money")}>See how it works</button>
+                <button className="btn lp-btn" onClick={() => scrollTo("film")}><Play size={15} fill="currentColor" strokeWidth={0} />Watch the film</button>
               </div>
               {err && <p className="lp-err" role="alert">{err}</p>}
               {hasDemo && <p className="lp-note">The demo is a sample electronics shop with five months of sales. No sign-up.</p>}
             </div>
             <BriefPhone />
+          </div>
+        </section>
+
+        <section className="lp-section lp-film" id="film">
+          <div className="lp-wrap">
+            <h2 className="lp-h2">See it work, start to finish</h2>
+            <p className="lp-p">
+              One shop's day in about a minute: the money stuck on the shelves, an order typed in plain words, a supplier's bill
+              read from a photo, and the next morning's WhatsApp. Turn the sound on.
+            </p>
+            <FilmPlayer />
           </div>
         </section>
 
@@ -407,15 +471,15 @@ export default function Landing() {
               Pieces don't tell you much. Paisa Radar multiplies what's on the shelf by what you paid for it, then sorts it by
               how long ago it last sold. The further down this list, the longer that money has been sitting still.
             </p>
-            <div className="lp-shelf" role="table" aria-label="Demo shop stock value by days since last sale">
-              {SHELF.map(r => (
+            <div ref={shelfRef} className={`lp-shelf ${shelfOn ? "on" : ""}`} role="table" aria-label="Demo shop stock value by days since last sale">
+              {SHELF.map((r, i) => (
                 <div key={r.label} className={`lp-shelf-row ${r.stuck ? "stuck" : ""}`} role="row">
                   <div role="cell">
                     <div className="lp-shelf-age">{r.label}</div>
-                    <div className="lp-shelf-amt">{inr(r.value)}</div>
+                    <div className="lp-shelf-amt"><ShelfAmount value={r.value} on={shelfOn} /></div>
                   </div>
                   <div className="lp-shelf-bar" role="cell" aria-label={`${Math.round(r.value / SHELF_TOTAL * 100)}% of stock value`}>
-                    <i style={{ width: `${(r.value / SHELF_TOTAL) * 100}%`, background: r.color }} />
+                    <i style={{ width: shelfOn ? `${(r.value / SHELF_TOTAL) * 100}%` : 0, background: r.color, transitionDelay: `${i * 120}ms` }} />
                   </div>
                   <div className="lp-shelf-items" role="cell">{r.items}</div>
                 </div>
