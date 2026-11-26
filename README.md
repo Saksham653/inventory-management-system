@@ -25,6 +25,8 @@
 **StockWaves** is inventory software for Indian shops that counts stock in rupees, not just pieces. It shows which stock isn't selling, what will run out before the next delivery, and drafts the order. Every morning it sends that as one WhatsApp you can approve with a tap. Supplier bills go into stock from a photo, and the whole app takes plain commands in English or Hinglish.
 
 > 🌊 **Landing page and live demo:** [https://stockwaves.netlify.app](https://stockwaves.netlify.app) (signed-out visitors see the landing page; "Open the demo shop" signs you into the sample shop)
+>
+> 🎬 **Product film:** a 69-second walkthrough of the whole app plays on the landing page (`frontend/public/film/`). Music: "Coffee or Tea" by Michael Ramir C. ([Mixkit Stock Music Free License](https://mixkit.co/license/#musicFree)); sound effects from Mixkit (Mixkit Sound Effects Free License).
 
 ---
 
